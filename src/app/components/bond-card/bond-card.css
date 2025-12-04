@@ -1,0 +1,111 @@
+.bond-card {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.paper-shadow {
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  border-bottom: 1px dashed #ccc;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}
+
+.bond-type {
+  background-color: #8b4513;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.bond-details {
+  flex: 1;
+}
+
+.bond-details h3 {
+  margin: 0 0 5px 0;
+  color: #333;
+}
+
+.description {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.interest-badge {
+  text-align: right;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #8b4513;
+  line-height: 1;
+}
+
+.interest-badge .sub {
+  display: block;
+  font-size: 0.7rem;
+  color: #999;
+  font-weight: normal;
+}
+
+.simulation-controls {
+  margin-bottom: 20px;
+}
+
+.simulation-controls label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.slider {
+  width: 100%;
+  accent-color: #8b4513;
+}
+
+.results-summary {
+  display: flex;
+  justify-content: space-between;
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.result-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.result-item .label {
+  font-size: 0.8rem;
+  color: #777;
+  text-transform: uppercase;
+}
+
+.result-item .value {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.result-item .tax {
+  color: #d32f2f;
+}
+
+.chart-container {
+  height: 200px;
+  width: 100%;
+}
