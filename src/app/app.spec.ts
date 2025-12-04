@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { AppComponent } from './app';
 import { MainPageComponent } from './components/main-page/main-page';
