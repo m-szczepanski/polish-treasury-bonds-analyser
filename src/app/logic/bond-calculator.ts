@@ -101,4 +101,66 @@ export class BondCalculator {
       netProfit: netProfit,
     };
   }
+
+  /**
+   * Calculates the value received when redeeming a bond early.
+   * @param bond The bond type
+   * @param amount Initial investment amount
+   * @param redemptionMonth Month at which the bond is redeemed (must be < durationMonths)
+   * @param inflationRate Assumed constant inflation rate for indexed bonds (after 1st year)
+   * @returns Early redemption result with fees and net proceeds
+   */
+  static simulateEarlyRedemption(
+    bond: Bond,
+    amount: number,
+    redemptionMonth: number,
+    inflationRate = 0
+  ): EarlyRedemptionResult {
+    // Validate redemption month
+    if (redemptionMonth <= 0 || redemptionMonth >= bond.durationMonths) {
+      throw new Error(
+        `Redemption month must be between 1 and ${bond.durationMonths - 1}`
+      );
+    }
+
+    // Run simulation up to redemption month
+    const fullSimulation = this.simulate(bond, amount, inflationRate);
+    const valueAtRedemption = fullSimulation.values[redemptionMonth];
+
+    // Calculate gross profit at redemption
+    const grossProfit = valueAtRedemption - amount;
+
+    // Calculate early redemption fee
+    // Fee is per 100 PLN unit, so we need to scale by amount
+    const feeAmount = (bond.earlyRedemptionFee * amount) / 100;
+
+    // Calculate tax on gross profit (before fee)
+    const tax = Math.max(0, grossProfit * Constants.TAX_RATE);
+
+    // Net proceeds = Value - Fee - Tax
+    const netProceeds = valueAtRedemption - feeAmount - tax;
+
+    // Calculate net profit (what you gained after costs)
+    const netProfit = netProceeds - amount;
+
+    return {
+      redemptionMonth,
+      valueAtRedemption,
+      grossProfit,
+      earlyRedemptionFee: feeAmount,
+      tax,
+      netProceeds,
+      netProfit,
+    };
+  }
+}
+
+export interface EarlyRedemptionResult {
+  redemptionMonth: number;
+  valueAtRedemption: number;
+  grossProfit: number;
+  earlyRedemptionFee: number;
+  tax: number;
+  netProceeds: number;
+  netProfit: number;
 }
