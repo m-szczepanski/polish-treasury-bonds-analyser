@@ -1,4 +1,4 @@
-import { BondCalculator, SimulationResult } from './bond-calculator';
+import { BondCalculator } from './bond-calculator';
 import { Bond, BondType, Constants } from './constants';
 
 describe('BondCalculator', () => {

@@ -124,6 +124,9 @@ export class BondCalculator {
     }
 
     // Run simulation up to redemption month
+    // Note: We run the full simulation because some bonds (like OTS with capitalization at maturity)
+    // need to know the original duration to calculate interest correctly.
+    // The performance impact is minimal for typical bond durations.
     const fullSimulation = this.simulate(bond, amount, inflationRate);
     const valueAtRedemption = fullSimulation.values[redemptionMonth];
 
