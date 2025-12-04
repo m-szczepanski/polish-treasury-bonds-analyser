@@ -1,19 +1,34 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component, Input } from '@angular/core';
+import { MainPageComponent } from './main-page';
+import { BondCardComponent } from '../bond-card/bond-card';
 
-import { MainPage } from './main-page';
+@Component({
+  selector: 'app-bond-card',
+  standalone: true,
+  template: ''
+})
+class MockBondCardComponent {
+  @Input() bond: any;
+}
 
-describe('MainPage', () => {
-  let component: MainPage;
-  let fixture: ComponentFixture<MainPage>;
+describe('MainPageComponent', () => {
+  let component: MainPageComponent;
+  let fixture: ComponentFixture<MainPageComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MainPage],
-    }).compileComponents();
+      imports: [MainPageComponent],
+    })
+      .overrideComponent(MainPageComponent, {
+        remove: { imports: [BondCardComponent] },
+        add: { imports: [MockBondCardComponent] }
+      })
+      .compileComponents();
 
-    fixture = TestBed.createComponent(MainPage);
+    fixture = TestBed.createComponent(MainPageComponent);
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {
