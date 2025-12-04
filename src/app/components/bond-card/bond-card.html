@@ -12,21 +12,7 @@
   </div>
 
   <div class="card-body">
-    <div class="simulation-controls">
-      <label for="investment-slider"
-        >Kwota inwestycji: <strong>{{ investmentAmount | number: '1.0-0' }} PLN</strong></label
-      >
-      <input
-        id="investment-slider"
-        type="range"
-        min="100"
-        max="100000"
-        step="100"
-        [(ngModel)]="investmentAmount"
-        (ngModelChange)="onSliderChange()"
-        class="slider"
-      />
-    </div>
+
 
     <div class="results-summary">
       <div class="result-item">
@@ -35,19 +21,15 @@
       </div>
       <div class="result-item">
         <span class="label">Podatek Belki:</span>
-        <span class="value tax"
-          >-{{
-            (simulationResult?.totalProfit || 0) - (simulationResult?.netProfit || 0)
-              | number: '1.2-2'
+        <span class="value tax">-{{
+          (simulationResult?.totalProfit || 0) - (simulationResult?.netProfit || 0)
+          | number: '1.2-2'
           }}
-          PLN</span
-        >
+          PLN</span>
       </div>
       <div class="result-item highlight">
         <span class="label">Zysk Netto:</span>
-        <span class="value" [style.color]="profitColor"
-          >{{ simulationResult?.netProfit | number: '1.2-2' }} PLN</span
-        >
+        <span class="value" [style.color]="profitColor">{{ simulationResult?.netProfit | number: '1.2-2' }} PLN</span>
       </div>
     </div>
 

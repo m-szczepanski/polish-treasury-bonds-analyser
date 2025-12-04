@@ -10,6 +10,7 @@ import { BondCardComponent } from '../bond-card/bond-card';
 })
 class MockBondCardComponent {
   @Input() bond: any;
+  @Input() investmentAmount: any;
 }
 
 describe('MainPageComponent', () => {

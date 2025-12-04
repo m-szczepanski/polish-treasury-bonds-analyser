@@ -15,8 +15,7 @@ import { BondCalculator, SimulationResult } from '../../logic/bond-calculator';
 })
 export class BondCardComponent implements OnInit, OnChanges {
   @Input() bond!: Bond;
-
-  investmentAmount = 1000;
+  @Input() investmentAmount = 1000;
   simulationResult: SimulationResult | null = null;
 
   // Chart configuration
@@ -67,14 +66,12 @@ export class BondCardComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['bond']) {
+    if (changes['bond'] || changes['investmentAmount']) {
       this.calculate();
     }
   }
 
-  onSliderChange(): void {
-    this.calculate();
-  }
+
 
   private calculate(): void {
     if (!this.bond) return;
