@@ -1,0 +1,59 @@
+<div class="bond-card paper-shadow">
+  <div class="card-header">
+    <div class="bond-type">{{ bond.type }}</div>
+    <div class="bond-details">
+      <h3>{{ bond.name }}</h3>
+      <p class="description">{{ bond.description }}</p>
+    </div>
+    <div class="interest-badge">
+      {{ bond.interestRate }}%
+      <span class="sub">w skali roku</span>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="simulation-controls">
+      <label for="investment-slider"
+        >Kwota inwestycji: <strong>{{ investmentAmount | number: '1.0-0' }} PLN</strong></label
+      >
+      <input
+        id="investment-slider"
+        type="range"
+        min="100"
+        max="100000"
+        step="100"
+        [(ngModel)]="investmentAmount"
+        (ngModelChange)="onSliderChange()"
+        class="slider"
+      />
+    </div>
+
+    <div class="results-summary">
+      <div class="result-item">
+        <span class="label">Zysk Brutto:</span>
+        <span class="value">{{ simulationResult?.totalProfit | number: '1.2-2' }} PLN</span>
+      </div>
+      <div class="result-item">
+        <span class="label">Podatek Belki:</span>
+        <span class="value tax"
+          >-{{
+            (simulationResult?.totalProfit || 0) - (simulationResult?.netProfit || 0)
+              | number: '1.2-2'
+          }}
+          PLN</span
+        >
+      </div>
+      <div class="result-item highlight">
+        <span class="label">Zysk Netto:</span>
+        <span class="value" [style.color]="profitColor"
+          >{{ simulationResult?.netProfit | number: '1.2-2' }} PLN</span
+        >
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="lineChartType">
+      </canvas>
+    </div>
+  </div>
+</div>
