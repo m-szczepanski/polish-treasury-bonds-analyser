@@ -24,7 +24,7 @@ export class Constants {
   static readonly BONDS: Bond[] = [
     {
       type: BondType.OTS,
-      name: 'OTS - 3-miesięczne',
+      name: '3-miesięczne',
       description: 'Oszczędnościowe Trzymiesięczne Stałoprocentowe',
       interestRate: 2.5,
       durationMonths: 3,
@@ -34,7 +34,7 @@ export class Constants {
     },
     {
       type: BondType.ROR,
-      name: 'ROR - Roczne',
+      name: 'Roczne',
       description: 'Roczne Oszczędnościowe Referencyjne',
       interestRate: 4.25,
       durationMonths: 12,
@@ -44,7 +44,7 @@ export class Constants {
     },
     {
       type: BondType.DOR,
-      name: 'DOR - 2-letnie',
+      name: '2-letnie',
       description: 'Dwuletnie Oszczędnościowe Referencyjne',
       interestRate: 4.4,
       durationMonths: 24,
@@ -54,7 +54,7 @@ export class Constants {
     },
     {
       type: BondType.TOS,
-      name: 'TOS - 3-letnie',
+      name: '3-letnie',
       description: 'Trzyletnie Oszczędnościowe Stałoprocentowe',
       interestRate: 4.65,
       durationMonths: 36,
@@ -64,7 +64,7 @@ export class Constants {
     },
     {
       type: BondType.COI,
-      name: 'COI - 4-letnie',
+      name: '4-letnie',
       description: 'Czteroletnie Oszczędnościowe Indeksowane Inflacją',
       interestRate: 5, // First year fixed
       durationMonths: 48,
@@ -74,7 +74,7 @@ export class Constants {
     },
     {
       type: BondType.EDO,
-      name: 'EDO - 10-letnie',
+      name: '10-letnie',
       description: 'Emerytalne Dziesięcioletnie Oszczędnościowe',
       interestRate: 5.6, // First year fixed
       durationMonths: 120,

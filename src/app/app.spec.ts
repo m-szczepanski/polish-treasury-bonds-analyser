@@ -1,31 +1,26 @@
 import { TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { AppComponent } from './app';
-import { MainPageComponent } from './components/main-page/main-page';
-import { SidePanelComponent } from './components/side-panel/side-panel';
+import { TopMenuComponent } from './components/top-menu/top-menu';
+import { RouterOutlet } from '@angular/router';
+import { provideRouter } from '@angular/router';
 
 @Component({
-  selector: 'app-main-page',
+  selector: 'app-top-menu',
   standalone: true,
   template: ''
 })
-class MockMainPageComponent { }
-
-@Component({
-  selector: 'app-side-panel',
-  standalone: true,
-  template: ''
-})
-class MockSidePanelComponent { }
+class MockTopMenuComponent { }
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
+      providers: [provideRouter([])],
     })
       .overrideComponent(AppComponent, {
-        remove: { imports: [MainPageComponent, SidePanelComponent] },
-        add: { imports: [MockMainPageComponent, MockSidePanelComponent] }
+        remove: { imports: [TopMenuComponent, RouterOutlet] },
+        add: { imports: [MockTopMenuComponent, RouterOutlet] }
       })
       .compileComponents();
   });

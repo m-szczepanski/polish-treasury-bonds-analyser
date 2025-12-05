@@ -1,0 +1,43 @@
+.strategy-container {
+    padding: 60px 20px;
+    max-width: 900px;
+    margin: 0 auto;
+    min-height: 100vh;
+}
+
+.strategy-container::before {
+    display: none;
+}
+
+.header {
+    margin-bottom: 60px;
+    text-align: center;
+}
+
+.header h1 {
+    font-family: inherit;
+    color: #000;
+    margin-bottom: 16px;
+    font-weight: 700;
+    font-size: 2.5rem;
+    letter-spacing: -0.5px;
+}
+
+.header p {
+    color: #666;
+    font-size: 1.1rem;
+    font-style: normal;
+}
+
+.content-placeholder {
+    margin-left: 0;
+    padding: 40px;
+    background: #f8f8f8;
+    box-shadow: none;
+    border-radius: 12px;
+    transform: none;
+    font-family: inherit;
+    color: #333;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
