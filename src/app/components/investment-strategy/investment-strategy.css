@@ -1,54 +1,43 @@
 .strategy-container {
-    padding: 40px;
+    padding: 60px 20px;
     max-width: 900px;
     margin: 0 auto;
-    background-color: #fdfbf7;
-    background-image: linear-gradient(#e1e1e1 1px, transparent 1px);
-    background-size: 100% 2rem;
     min-height: 100vh;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    position: relative;
-    font-family: 'Courier New', Courier, monospace;
 }
 
 .strategy-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 60px;
-    width: 2px;
-    background-color: #ff9999;
-    z-index: 0;
+    display: none;
 }
 
 .header {
-    margin-bottom: 40px;
+    margin-bottom: 60px;
     text-align: center;
-    position: relative;
-    z-index: 1;
-    padding-top: 2rem;
 }
 
 .header h1 {
-    font-family: 'Courier New', Courier, monospace;
-    color: #333;
-    margin-bottom: 10px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    font-family: inherit;
+    color: #000;
+    margin-bottom: 16px;
+    font-weight: 700;
+    font-size: 2.5rem;
+    letter-spacing: -0.5px;
 }
 
 .header p {
-    color: #555;
-    font-style: italic;
+    color: #666;
     font-size: 1.1rem;
+    font-style: normal;
 }
 
 .content-placeholder {
-    margin-left: 80px;
-    position: relative;
-    z-index: 1;
-    font-size: 1.2rem;
+    margin-left: 0;
+    padding: 40px;
+    background: #f8f8f8;
+    box-shadow: none;
+    border-radius: 12px;
+    transform: none;
+    font-family: inherit;
     color: #333;
+    font-size: 1.1rem;
+    line-height: 1.6;
 }
