@@ -1,3 +1,7 @@
+:host {
+  padding-bottom: 48px;
+}
+
 .bond-card {
   background: #ffffff;
   padding: 24px;
