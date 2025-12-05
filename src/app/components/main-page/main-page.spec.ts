@@ -56,7 +56,7 @@ describe('MainPageComponent', () => {
     fixture.detectChanges();
 
     const label = fixture.nativeElement.querySelector('label[for="global-investment"]') as HTMLElement;
-    expect(label.textContent).toContain('7 500');
+    expect(label.textContent).toContain('Kwota inwestycji: 7,500 PLN');
   });
 
   it('should propagate investmentAmount to bond-card components', () => {
