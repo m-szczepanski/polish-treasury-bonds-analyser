@@ -18,7 +18,6 @@ export class BondCardComponent implements OnInit, OnChanges {
   @Input() investmentAmount = 1000;
   simulationResult: SimulationResult | null = null;
 
-  // Chart configuration
   public lineChartData: ChartData<'line'> = {
     labels: [],
     datasets: [
@@ -71,8 +70,6 @@ export class BondCardComponent implements OnInit, OnChanges {
     }
   }
 
-
-
   private calculate(): void {
     if (!this.bond) return;
 
@@ -89,7 +86,6 @@ export class BondCardComponent implements OnInit, OnChanges {
     this.lineChartData.labels = this.simulationResult.months.map((m) => `M${m}`);
     this.lineChartData.datasets[0].data = this.simulationResult.values;
 
-    // Trigger chart update
     this.lineChartData = { ...this.lineChartData };
   }
 
