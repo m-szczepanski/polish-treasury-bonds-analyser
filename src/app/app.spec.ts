@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { AppComponent } from './app';
 import { TopMenuComponent } from './components/top-menu/top-menu';
 import { RouterOutlet } from '@angular/router';
+import { provideRouter } from '@angular/router';
 
 @Component({
   selector: 'app-top-menu',
@@ -15,6 +16,7 @@ describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
+      providers: [provideRouter([])],
     })
       .overrideComponent(AppComponent, {
         remove: { imports: [TopMenuComponent, RouterOutlet] },

@@ -14,7 +14,7 @@
   </div>
 
   <div class="bonds-list">
-    @for (bond of bonds; track bond.name) {
+    @for (bond of bonds; track bond.type) {
     <app-bond-card [bond]="bond" [investmentAmount]="investmentAmount"></app-bond-card>
     }
   </div>
