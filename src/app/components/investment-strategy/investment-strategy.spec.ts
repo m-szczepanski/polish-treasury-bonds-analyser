@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { InvestmentStrategyComponent } from './investment-strategy';
-import { By } from '@angular/platform-browser';
 
 describe('InvestmentStrategyComponent', () => {
     let component: InvestmentStrategyComponent;

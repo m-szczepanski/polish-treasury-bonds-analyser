@@ -34,48 +34,9 @@ export class StrategyCalculator {
         }
 
         const tranches: Tranche[] = [];
-        const payoutsAtMonth: Map<number, number> = new Map();
 
         let runningExternalInvested = 0;
         let cumulativeTaxPaid = 0;
-
-        for (let m = 0; m <= totalMonths; m++) {
-            months.push(m);
-
-            let newExternalInvestment = 0;
-
-            if (m === 0) {
-                newExternalInvestment += request.initialAmount;
-            }
-            if (m < totalMonths) {
-                if (m > 0 && m % request.frequencyMonths === 0) {
-                    newExternalInvestment += request.recurringAmount;
-                } else if (m === 0 && request.recurringAmount > 0 && request.initialAmount === 0) {
-                    newExternalInvestment += request.recurringAmount;
-                }
-            }
-
-            runningExternalInvested += newExternalInvestment;
-            totalInvested.push(runningExternalInvested);
-
-            if (newExternalInvestment > 0) {
-                const sim = BondCalculator.simulate(request.bond, newExternalInvestment, request.inflationRate);
-                tranches.push({ startMonth: m, amount: newExternalInvestment, simulation: sim, isReinvestment: false });
-            }
-
-            let payoutAvailable = payoutsAtMonth.get(m) || 0;
-
-            if (request.reinvest && payoutAvailable > 0 && m < totalMonths) {
-                const sim = BondCalculator.simulate(request.bond, payoutAvailable, request.inflationRate);
-                tranches.push({ startMonth: m, amount: payoutAvailable, simulation: sim, isReinvestment: true });
-            }
-        }
-
-        months.length = 0;
-        totalInvested.length = 0;
-        totalValue.length = 0;
-        tranches.length = 0;
-        runningExternalInvested = 0;
         let cumulativeCashWallet = 0;
 
         for (let m = 0; m <= totalMonths; m++) {
@@ -124,7 +85,6 @@ export class StrategyCalculator {
 
                 if (m < maturityMonth) {
                     monthlySum += tranche.simulation.values[relativeMonth];
-                } else {
                 }
             }
 
