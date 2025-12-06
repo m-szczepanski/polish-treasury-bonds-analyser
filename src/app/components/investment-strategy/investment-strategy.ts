@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Bond, BondType, Constants } from '../../logic/constants';
+import { Bond, Constants } from '../../logic/constants';
 import { StrategyCalculator, StrategyResult } from '../../logic/strategy-calculator';
-import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
+import { ChartConfiguration, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
 export interface BondStrategyConfig {

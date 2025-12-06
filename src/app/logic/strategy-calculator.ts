@@ -69,9 +69,6 @@ export class StrategyCalculator {
                 const sim = BondCalculator.simulate(request.bond, payoutAvailable, request.inflationRate);
                 tranches.push({ startMonth: m, amount: payoutAvailable, simulation: sim, isReinvestment: true });
             }
-
-            let currentTotalValue = 0;
-            let cashWallet = 0;
         }
 
         months.length = 0;
