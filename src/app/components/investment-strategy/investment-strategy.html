@@ -17,11 +17,9 @@
 
             <div class="form-group">
                 <label>Czas trwania</label>
-                <div class="range-display">
-                    <input type="range" [(ngModel)]="durationMonths" (ngModelChange)="calculate()" min="1" max="120"
-                        step="1">
-                    <span class="value-label">{{ durationMonths }} mies.</span>
-                </div>
+                <input type="range" [(ngModel)]="durationMonths" (ngModelChange)="calculate()" min="1" max="120"
+                    step="1">
+                <span class="value-label">{{ durationMonths }} mies.</span>
             </div>
 
             <div class="form-group">

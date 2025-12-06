@@ -39,6 +39,9 @@ export class InvestmentStrategyComponent implements OnInit {
     public summaryChart: ChartSet | null = null;
     public individualCharts: ChartSet[] = [];
 
+    private debounceTimer: any = null;
+    private readonly DEBOUNCE_MS = 300;
+
     public lineChartType: ChartType = 'line';
 
     private readonly baseChartOptions: ChartConfiguration['options'] = {
@@ -85,6 +88,21 @@ export class InvestmentStrategyComponent implements OnInit {
     }
 
     calculate() {
+        if (this.debounceTimer) {
+            clearTimeout(this.debounceTimer);
+        }
+
+        this.debounceTimer = setTimeout(() => {
+            this.performCalculation();
+        }, this.DEBOUNCE_MS);
+    }
+
+    private performCalculation() {
+        if (this.frequencyMonths <= 0 || this.durationMonths <= 0 || this.inflationRate < 0) {
+            console.warn('Invalid inputs detected', { frequencyMonths: this.frequencyMonths, durationMonths: this.durationMonths, inflationRate: this.inflationRate });
+            return;
+        }
+
         const activeConfigs = this.configurations.filter(c => c.isSelected);
         this.individualCharts = [];
         this.summaryChart = null;
@@ -92,6 +110,13 @@ export class InvestmentStrategyComponent implements OnInit {
 
         if (activeConfigs.length === 0) {
             return;
+        }
+
+        for (const config of activeConfigs) {
+            if (config.initialAmount < 0 || config.recurringAmount < 0) {
+                console.warn('Negative amounts detected for bond', config.bond.type);
+                return;
+            }
         }
 
         const simulations: { config: BondStrategyConfig; result: StrategyResult }[] = activeConfigs.map(config => {

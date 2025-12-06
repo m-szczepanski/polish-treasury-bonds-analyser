@@ -45,6 +45,23 @@ describe('StrategyCalculator', () => {
         expect(result.totalValue[12]).toBeGreaterThan(12000);
     });
 
+    it('should handle recurring investment at month 0 with both initial and recurring amounts', () => {
+        const result = StrategyCalculator.simulate({
+            bond: otsBond,
+            initialAmount: 500,
+            recurringAmount: 1000,
+            frequencyMonths: 1,
+            durationMonths: 3,
+            inflationRate: 0,
+            reinvest: false
+        });
+
+        expect(result.totalInvested[0]).toBe(1500);
+        expect(result.totalInvested[1]).toBe(2500);
+        expect(result.totalInvested[2]).toBe(3500);
+        expect(result.totalInvested[3]).toBe(3500);
+    });
+
     it('should accumulate value correctly for overlapping bonds (TOS)', () => {
         const request: StrategyRequest = {
             bond: tosBond,
@@ -58,8 +75,8 @@ describe('StrategyCalculator', () => {
 
         const result = StrategyCalculator.simulate(request);
 
-        expect(result.totalInvested[12]).toBe(2000);
-        expect(result.totalValue[12]).toBeGreaterThan(2000);
+        expect(result.totalInvested[12]).toBe(3000);
+        expect(result.totalValue[12]).toBeGreaterThan(3000);
     });
 
     describe('Tax Calculations', () => {
