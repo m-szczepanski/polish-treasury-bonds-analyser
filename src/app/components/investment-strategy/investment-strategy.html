@@ -59,6 +59,14 @@
                                         (ngModelChange)="calculate()" min="0" step="100">
                                 </div>
                             </div>
+                            <div class="input-row">
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" [id]="'reinvest-' + config.bond.type"
+                                        [(ngModel)]="config.reinvest" (ngModelChange)="calculate()">
+                                    <label [for]="'reinvest-' + config.bond.type">Reinwestuj zysk po zakończeniu
+                                        obligacji</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -24,14 +24,12 @@
     margin: 0;
 }
 
-/* Layout */
 .strategy-content {
     display: grid;
     grid-template-columns: 350px 1fr;
     gap: 40px;
 }
 
-/* Controls Panel */
 .controls-panel {
     background: #fff;
     border: 1px solid #e0e0e0;
@@ -86,13 +84,11 @@
     margin-top: 4px;
 }
 
-/* Range Slider */
 .form-group input[type="range"] {
     width: 100%;
     margin: 10px 0;
 }
 
-/* Radio List for Bonds */
 .radio-list {
     display: flex;
     flex-direction: column;
@@ -119,7 +115,6 @@
     background: #fdfdfd;
 }
 
-/* Radio/Checkbox Styles */
 .radio-circle {
     width: 18px;
     height: 18px;
@@ -162,7 +157,6 @@
     flex-grow: 1;
 }
 
-/* Collapsible Inputs */
 .config-inputs {
     padding: 0 12px 12px 12px;
     border-top: 1px solid #f5f5f5;
@@ -211,11 +205,31 @@
     border-radius: 3px;
 }
 
-/* Charts Grid */
 .charts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 32px;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #8b4513;
+    cursor: pointer;
+}
+
+.checkbox-wrapper label {
+    font-size: 14px;
+    color: #444;
+    cursor: pointer;
+    font-weight: 500;
 }
 
 .chart-container h3 {
@@ -236,13 +250,11 @@
 }
 
 
-/* Radio/Checkbox Styles */
 .radio-circle {
     width: 18px;
     height: 18px;
     border: 2px solid #ddd;
     border-radius: 50%;
-    /* Default round */
     margin-right: 12px;
     display: flex;
     align-items: center;
@@ -280,7 +292,6 @@
     color: #888;
 }
 
-/* Visualization Panel */
 .visualization-panel {
     display: flex;
     flex-direction: column;
@@ -296,7 +307,6 @@
     position: relative;
 }
 
-/* Summary Cards */
 .summary-cards {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -342,7 +352,6 @@
     color: #000;
 }
 
-/* Responsive */
 @media (max-width: 900px) {
     .strategy-content {
         grid-template-columns: 1fr;

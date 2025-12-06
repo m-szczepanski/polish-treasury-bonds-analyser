@@ -11,6 +11,7 @@ export interface BondStrategyConfig {
     isSelected: boolean;
     initialAmount: number;
     recurringAmount: number;
+    reinvest: boolean;
 }
 
 export interface ChartSet {
@@ -27,18 +28,14 @@ export interface ChartSet {
     styleUrl: './investment-strategy.css',
 })
 export class InvestmentStrategyComponent implements OnInit {
-    // Global Config
     frequencyMonths: number = 1;
-    durationMonths: number = 12; // Default 1 year
+    durationMonths: number = 12;
     inflationRate: number = 4.5;
 
-    // Per-Bond Config
     configurations: BondStrategyConfig[] = [];
 
-    // Result
     result: StrategyResult | null = null;
 
-    // Charts
     public summaryChart: ChartSet | null = null;
     public individualCharts: ChartSet[] = [];
 
@@ -75,9 +72,10 @@ export class InvestmentStrategyComponent implements OnInit {
     private initializeConfigurations() {
         this.configurations = Constants.BONDS.map(bond => ({
             bond,
-            isSelected: bond.type === BondType.TOS, // Default one selected
+            isSelected: false,
             initialAmount: 10000,
-            recurringAmount: 500
+            recurringAmount: 500,
+            reinvest: true
         }));
     }
 
@@ -96,7 +94,6 @@ export class InvestmentStrategyComponent implements OnInit {
             return;
         }
 
-        // Run user simulation for each active config
         const simulations: { config: BondStrategyConfig; result: StrategyResult }[] = activeConfigs.map(config => {
             return {
                 config,
@@ -106,12 +103,12 @@ export class InvestmentStrategyComponent implements OnInit {
                     recurringAmount: config.recurringAmount,
                     frequencyMonths: this.frequencyMonths,
                     durationMonths: this.durationMonths,
-                    inflationRate: this.inflationRate
+                    inflationRate: this.inflationRate,
+                    reinvest: config.reinvest
                 })
             };
         });
 
-        // 1. Aggregate Result
         const baseResult = simulations[0].result;
         const totalValue = new Array(baseResult.months.length).fill(0);
         const totalInvested = new Array(baseResult.months.length).fill(0);
@@ -140,7 +137,6 @@ export class InvestmentStrategyComponent implements OnInit {
             netProfit: aggNetProfit
         };
 
-        // 2. Build Summary Chart
         this.summaryChart = {
             title: 'Podsumowanie Portfela',
             data: {
@@ -187,8 +183,6 @@ export class InvestmentStrategyComponent implements OnInit {
             }
         };
 
-        // 3. Build Individual Charts
-        // 3. Build Individual Charts (only if more than one bond selected)
         if (simulations.length > 1) {
             simulations.forEach(sim => {
                 this.individualCharts.push({
