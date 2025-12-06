@@ -1,43 +1,331 @@
 .strategy-container {
-    padding: 60px 20px;
-    max-width: 900px;
+    max-width: 1200px;
     margin: 0 auto;
-    min-height: 100vh;
-}
-
-.strategy-container::before {
-    display: none;
+    padding: 24px;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: #000;
 }
 
 .header {
-    margin-bottom: 60px;
+    margin-bottom: 40px;
     text-align: center;
 }
 
 .header h1 {
-    font-family: inherit;
-    color: #000;
-    margin-bottom: 16px;
-    font-weight: 700;
-    font-size: 2.5rem;
+    font-size: 32px;
+    font-weight: 300;
+    margin-bottom: 8px;
     letter-spacing: -0.5px;
 }
 
 .header p {
+    font-size: 16px;
     color: #666;
-    font-size: 1.1rem;
-    font-style: normal;
+    margin: 0;
 }
 
-.content-placeholder {
-    margin-left: 0;
-    padding: 40px;
-    background: #f8f8f8;
-    box-shadow: none;
-    border-radius: 12px;
-    transform: none;
-    font-family: inherit;
-    color: #333;
-    font-size: 1.1rem;
-    line-height: 1.6;
+.strategy-content {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 40px;
+}
+
+.controls-panel {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 24px;
+    height: fit-content;
+}
+
+.controls-panel h2 {
+    font-size: 18px;
+    font-weight: 500;
+    margin-top: 0;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 12px;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+.form-group input[type="number"],
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.form-group input[type="number"]:focus {
+    border-color: #000;
+    outline: none;
+}
+
+.form-group .hint {
+    display: block;
+    font-size: 11px;
+    color: #999;
+    margin-top: 4px;
+}
+
+.form-group input[type="range"] {
+    width: 100%;
+    margin: 10px 0;
+}
+
+.value-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #000;
+    margin-left: 12px;
+}
+
+.radio-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.radio-circle {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ddd;
+    border-radius: 50%;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.radio-circle.checkbox-style {
+    border-radius: 4px;
+}
+
+.radio-item.selected .radio-circle {
+    border-color: #000;
+}
+
+.config-header:hover .radio-circle {
+    border-color: #bbb;
+}
+
+.radio-inner {
+    width: 10px;
+    height: 10px;
+    background: #000;
+    border-radius: 2px;
+}
+
+.config-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    background: #fff;
+    transition: border-color 0.2s;
+}
+
+.config-item:hover {
+    border-color: #ccc;
+}
+
+.config-header {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    cursor: pointer;
+}
+
+.bond-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.bond-name {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.bond-desc {
+    font-size: 11px;
+    color: #888;
+}
+
+.config-inputs {
+    padding: 0 12px 12px 12px;
+    border-top: 1px solid #f5f5f5;
+    background: #fafafa;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.input-row {
+    display: flex;
+    gap: 12px;
+    padding-top: 12px;
+}
+
+.input-wrapper {
+    flex: 1;
+}
+
+.input-wrapper label {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 6px;
+    font-size: 13px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #8b4513;
+    cursor: pointer;
+}
+
+.checkbox-wrapper label {
+    font-size: 14px;
+    color: #444;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.visualization-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.chart-container {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    height: 400px;
+    position: relative;
+}
+
+.chart-container h3 {
+    margin: 0 0 16px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+}
+
+.chart-container.small {
+    height: 300px;
+}
+
+.canvas-wrapper {
+    position: relative;
+    height: calc(100% - 30px);
+    width: 100%;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 32px;
+}
+
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.summary-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.summary-card.highlight {
+    background: #111;
+    border-color: #111;
+}
+
+.summary-card.highlight .label,
+.summary-card.highlight .value {
+    color: #fff;
+}
+
+.summary-card.profit .value,
+.summary-card.net-profit .value {
+    color: #10a37f;
+}
+
+.summary-card .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+}
+
+.summary-card .value {
+    font-size: 18px;
+    font-weight: 600;
+    color: #000;
+}
+
+@media (max-width: 900px) {
+    .strategy-content {
+        grid-template-columns: 1fr;
+    }
+
+    .summary-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }

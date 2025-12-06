@@ -1,11 +1,119 @@
 <div class="strategy-container">
     <div class="header">
         <h1>Strategia Inwestycyjna</h1>
-        <p>Symulacja wpłat jednorazowych i cyklicznych</p>
+        <p>Zaawansowana symulacja portfela obligacji</p>
     </div>
 
-    <div class="content-placeholder">
-        <p>Tu będzie analiza strategii inwestycyjnej.</p>
-        <p>Placeholder...</p>
+    <div class="strategy-content">
+        <!-- Configuration Control Panel -->
+        <div class="controls-panel">
+            <h2>Konfiguracja</h2>
+
+            <div class="form-group">
+                <label>Częstotliwość (miesiące)</label>
+                <input type="number" [(ngModel)]="frequencyMonths" (ngModelChange)="calculate()" min="1" max="12">
+                <span class="hint">Co ile miesięcy dokupować obligacje</span>
+            </div>
+
+            <div class="form-group">
+                <label>Czas trwania</label>
+                <input type="range" [(ngModel)]="durationMonths" (ngModelChange)="calculate()" min="1" max="120"
+                    step="1">
+                <span class="value-label">{{ durationMonths }} mies.</span>
+            </div>
+
+            <div class="form-group">
+                <label>Inflacja (%)</label>
+                <input type="number" [(ngModel)]="inflationRate" (ngModelChange)="calculate()" min="0" max="20"
+                    step="0.1">
+                <span class="hint">Dla obligacji indeksowanych (COI, EDO)</span>
+            </div>
+
+            <div class="form-group bond-selection">
+                <label>Obligacje i Kwoty</label>
+                <div class="radio-list">
+                    <div *ngFor="let config of configurations" class="config-item">
+                        <div class="config-header" (click)="toggleBond(config)">
+                            <div class="radio-circle checkbox-style">
+                                <div class="radio-inner" *ngIf="config.isSelected"></div>
+                            </div>
+                            <div class="bond-info">
+                                <span class="bond-name">{{ config.bond.name }}</span>
+                                <span class="bond-desc">{{ config.bond.description }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Collapsible Inputs -->
+                        <div class="config-inputs" *ngIf="config.isSelected">
+                            <div class="input-row">
+                                <div class="input-wrapper">
+                                    <label>Start (zł)</label>
+                                    <input type="number" [(ngModel)]="config.initialAmount"
+                                        (ngModelChange)="calculate()" min="0" step="100">
+                                </div>
+                                <div class="input-wrapper">
+                                    <label>Cyklicznie (zł)</label>
+                                    <input type="number" [(ngModel)]="config.recurringAmount"
+                                        (ngModelChange)="calculate()" min="0" step="100">
+                                </div>
+                            </div>
+                            <div class="input-row">
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" [id]="'reinvest-' + config.bond.type"
+                                        [(ngModel)]="config.reinvest" (ngModelChange)="calculate()">
+                                    <label [for]="'reinvest-' + config.bond.type">Reinwestuj zysk po zakończeniu
+                                        obligacji</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart and Summary -->
+        <div class="visualization-panel">
+
+            <!-- Summary Stats -->
+            <div class="summary-cards" *ngIf="result">
+                <div class="summary-card">
+                    <span class="label">Wpłacono łącznie</span>
+                    <span class="value">{{ totalInvestedSum | number:'1.2-2' }} zł</span>
+                </div>
+                <div class="summary-card highlight">
+                    <span class="label">Wartość portfela</span>
+                    <span class="value">{{ totalValueSum | number:'1.2-2' }} zł</span>
+                </div>
+                <div class="summary-card profit">
+                    <span class="label">Zysk Brutto</span>
+                    <span class="value">+{{ totalProfit | number:'1.2-2' }} zł</span>
+                </div>
+                <div class="summary-card net-profit">
+                    <span class="label">Zysk Netto</span>
+                    <span class="value">+{{ netProfit | number:'1.2-2' }} zł</span>
+                </div>
+            </div>
+
+            <!-- Summary Chart -->
+            <div class="chart-container" *ngIf="summaryChart">
+                <h3>{{ summaryChart.title }}</h3>
+                <div class="canvas-wrapper">
+                    <canvas baseChart [data]="summaryChart.data" [options]="summaryChart.options"
+                        [type]="lineChartType">
+                    </canvas>
+                </div>
+            </div>
+
+            <!-- Individual Charts Grid -->
+            <div class="charts-grid" *ngIf="individualCharts.length > 0">
+                <div class="chart-container small" *ngFor="let chart of individualCharts">
+                    <h3>{{ chart.title }}</h3>
+                    <div class="canvas-wrapper">
+                        <canvas baseChart [data]="chart.data" [options]="chart.options" [type]="lineChartType">
+                        </canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
