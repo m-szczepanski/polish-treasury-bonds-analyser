@@ -37,6 +37,7 @@ export class StrategyCalculator {
         const payoutsAtMonth: Map<number, number> = new Map();
 
         let runningExternalInvested = 0;
+        let cumulativeTaxPaid = 0;
 
         for (let m = 0; m <= totalMonths; m++) {
             months.push(m);
@@ -90,6 +91,7 @@ export class StrategyCalculator {
 
                     const profit = finalGrossValue - tranche.amount;
                     const tax = Math.max(0, profit * Constants.TAX_RATE);
+                    cumulativeTaxPaid += tax;
                     const netPayout = finalGrossValue - tax;
 
                     if (request.reinvest && m < totalMonths) {
@@ -144,6 +146,7 @@ export class StrategyCalculator {
                 if (relativeMonth > 0) {
                     const earlyResult = BondCalculator.simulateEarlyRedemption(request.bond, tranche.amount, relativeMonth, request.inflationRate);
                     finalLiquidationValue += earlyResult.netProceeds;
+                    cumulativeTaxPaid += earlyResult.tax;
                 } else {
                     finalLiquidationValue += tranche.amount;
                 }
@@ -154,14 +157,15 @@ export class StrategyCalculator {
             totalValue[totalValue.length - 1] = finalLiquidationValue;
         }
 
-        const grossProfit = finalLiquidationValue - runningExternalInvested;
+        const netProfit = finalLiquidationValue - runningExternalInvested;
+        const totalProfit = netProfit + cumulativeTaxPaid;
 
         return {
             months,
             totalInvested,
             totalValue,
-            totalProfit: grossProfit,
-            netProfit: grossProfit
+            totalProfit: totalProfit,
+            netProfit: netProfit
         };
     }
 }
