@@ -5,5 +5,6 @@ import { InvestmentStrategyComponent } from './components/investment-strategy/in
 export const routes: Routes = [
     { path: '', component: MainPageComponent },
     { path: 'strategy', component: InvestmentStrategyComponent },
+    { path: 'analysis', loadComponent: () => import('./components/portfolio-analysis/portfolio-analysis').then(m => m.PortfolioAnalysisComponent) },
     { path: '**', redirectTo: '' },
 ];
