@@ -156,7 +156,7 @@ export class PortfolioAnalysisComponent implements OnInit {
             timelineValues,
             true, // Primary color
             true  // Fill
-        ) as any as ChartDataset<'line', number[]>;
+        );
 
         this.profitChartData.labels = months.map(m => `M${m}`);
         this.profitChartData.datasets = [profitDataset];

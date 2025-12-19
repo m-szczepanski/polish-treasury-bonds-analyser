@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ChartConfiguration } from 'chart.js';
+import { ChartConfiguration, ChartDataset, ChartType } from 'chart.js';
 
 @Injectable({
     providedIn: 'root',
@@ -38,13 +38,13 @@ export class ChartConfigService {
         },
     };
 
-    getDataset(
+    getDataset<TType extends ChartType = 'line'>(
         label: string,
         data: number[],
         isPrimary = true,
         fill = true,
         borderDash: number[] = []
-    ): ChartConfiguration['data']['datasets'][0] {
+    ): ChartDataset<TType, number[]> {
         return {
             data,
             label,
@@ -58,6 +58,6 @@ export class ChartConfigService {
             borderWidth: 2,
             pointRadius: 0,
             borderDash,
-        };
+        } as unknown as ChartDataset<TType, number[]>;
     }
 }

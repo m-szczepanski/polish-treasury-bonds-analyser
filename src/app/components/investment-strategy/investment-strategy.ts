@@ -62,9 +62,6 @@ export class InvestmentStrategyComponent {
 
     public lineChartType: ChartType = 'line';
 
-    constructor() {
-    }
-
     private initializeConfigurations(): BondStrategyConfig[] {
         return Constants.BONDS.map(bond => ({
             bond,
