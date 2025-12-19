@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal, effect, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Bond, Constants } from '../../logic/constants';
@@ -75,7 +75,7 @@ export class InvestmentStrategyComponent {
         }));
     }
 
-    updateKwargs(key: 'freq' | 'dur' | 'infl', value: number) {
+    updateParameter(key: 'freq' | 'dur' | 'infl', value: number) {
         if (key === 'freq') this.frequencyMonths.set(value);
         if (key === 'dur') this.durationMonths.set(value);
         if (key === 'infl') this.inflationRate.set(value);
@@ -91,7 +91,7 @@ export class InvestmentStrategyComponent {
         }
     }
 
-    updateConfigValue(config: BondStrategyConfig, field: keyof BondStrategyConfig, value: any) {
+    updateConfigValue<K extends keyof BondStrategyConfig>(config: BondStrategyConfig, field: K, value: BondStrategyConfig[K]) {
         const current = this.configurations();
         const index = current.indexOf(config);
         if (index > -1) {
@@ -156,7 +156,7 @@ export class InvestmentStrategyComponent {
         };
     }
 
-    private createSummaryChart(result: any): ChartSet {
+    private createSummaryChart(result: StrategyResult): ChartSet {
         const labels = result.months.map((m: number) => `M${m}`);
         const dsValue = this.chartConfig.getDataset('Całkowita wartość', result.totalValue, true, true);
         const dsInvested = this.chartConfig.getDataset('Wpłacony kapitał', result.totalInvested, false, false, [5, 5]);

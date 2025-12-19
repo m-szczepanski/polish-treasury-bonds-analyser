@@ -27,7 +27,56 @@ export class StrategyCalculatorService {
     constructor(private bondCalculator: BondCalculatorService) { }
 
     /**
-     * Simulates an investment strategy over a specified duration, handling tranches, reinvestment, tax calculations, and early redemption.
+     * Simulates an investment strategy over the requested duration.
+     * The strategy is modeled as a series of investment “tranches”. Each tranche
+     * represents a single contribution (initial or recurring) that is invested
+     * into the given bond and then simulated independently using
+     * {@link BondCalculatorService}. Tranches are created as follows:
+     *
+     * - At month 0, the `initialAmount` (if > 0) is invested as the first tranche.
+     * - For each subsequent month up to `durationMonths`, a new tranche is
+     *   created whenever the month is a multiple of `frequencyMonths` and
+     *   `recurringAmount` > 0.
+     * - If `reinvest` is enabled, coupon payments and/or matured proceeds from
+     *   existing tranches may be treated as new contributions, effectively
+     *   creating additional reinvestment tranches over time.
+     *
+     * The per‑tranche bond simulations incorporate any bond‑specific behavior
+     * such as interest accrual, tax treatment, indexation, and early redemption
+     * rules via the underlying {@link BondCalculatorService}. This method
+     * aggregates the individual tranche simulations month by month to produce:
+     *
+     * - The timeline of simulated months.
+     * - The cumulative amount invested by those months (nominal contributions,
+     *   before profit/tax).
+     * - The total portfolio value, including principal and any reinvested
+     *   returns.
+     * - The gross profit (total value minus total invested).
+     * - The net profit after any taxes or early‑redemption effects included in
+     *   the tranche simulations.
+     *
+     * Input validation ensures:
+     * - `durationMonths` is non‑negative.
+     * - If `recurringAmount` > 0, then `frequencyMonths` must be positive.
+     * - `initialAmount` and `recurringAmount` must be non‑negative.
+     *
+     * @param request Configuration of the investment strategy to simulate.
+     * @param request.bond The bond definition used for each tranche simulation.
+     * @param request.initialAmount The amount invested at month 0.
+     * @param request.recurringAmount The amount invested at each recurring
+     *   contribution date (every `frequencyMonths`), if greater than zero.
+     * @param request.frequencyMonths The interval, in months, between recurring
+     *   contributions. Must be positive when `recurringAmount` > 0.
+     * @param request.durationMonths Total duration of the strategy, in months,
+     *   from the initial investment.
+     * @param request.inflationRate Annual inflation rate (as a fraction) that
+     *   may be used to adjust values within the underlying bond simulations.
+     * @param request.reinvest Whether returns (e.g., coupons, matured principal)
+     *   are reinvested into new tranches when possible.
+     *
+     * @returns A {@link StrategyResult} containing the month‑by‑month timeline
+     *   of total invested capital, total portfolio value, and aggregated gross
+     *   and net profit across all tranches.
      */
     simulate(request: StrategyRequest): StrategyResult {
         if (request.durationMonths < 0) {

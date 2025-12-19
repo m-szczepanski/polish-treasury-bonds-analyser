@@ -63,4 +63,8 @@ describe('BondCardComponent', () => {
     expect(component.lineChartData.datasets[0].data.length).toBeGreaterThan(0);
   });
 
+  it('should return correct profit color', () => {
+    expect(component.profitColor).toBe('#2e7d32');
+  });
+
 });
