@@ -1,8 +1,8 @@
-<div class="main-page-container">
-  <div class="header">
+<main class="main-page-container">
+  <header class="header">
     <h1>Kalkulator Obligacji Skarbowych</h1>
     <p>Symulacja zysków dla polskich obligacji skarbowych</p>
-  </div>
+  </header>
 
   <div class="controls-section">
     <div class="slider-container">
@@ -13,9 +13,9 @@
     </div>
   </div>
 
-  <div class="bonds-list">
+  <section class="bonds-list">
     @for (bond of bonds; track bond.type) {
     <app-bond-card [bond]="bond" [investmentAmount]="investmentAmount()"></app-bond-card>
     }
-  </div>
-</div>
+  </section>
+</main>
