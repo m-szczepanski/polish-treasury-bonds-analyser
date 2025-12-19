@@ -70,7 +70,7 @@ export class BondCardComponent implements OnInit, OnChanges {
     }
   }
 
-  private calculate(): void {
+  calculate(): void {
     if (!this.bond) return;
 
     // Default inflation assumption 5% for simulation if indexed
