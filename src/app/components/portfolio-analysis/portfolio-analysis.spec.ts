@@ -67,6 +67,7 @@ describe('PortfolioAnalysisComponent', () => {
     it('should generate charts data', () => {
         component.calculate();
         expect(component.pieChartData.labels?.length).toBeGreaterThan(0);
-        expect(component.barChartData.datasets[0].data.length).toBeGreaterThan(0);
+        expect(component.profitChartData.labels?.length).toBeGreaterThan(0);
+        expect(component.profitChartData.datasets[0].data.length).toBeGreaterThan(0);
     });
 });

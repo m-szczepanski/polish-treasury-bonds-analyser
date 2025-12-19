@@ -59,13 +59,7 @@ export class BondCardComponent {
       true // Use primary theme as base
     ) as unknown as ChartDataset<'line', number[]>;
 
-    // Override colors based on profit (Green/Red)
-    const color = this.profitColor;
-    dataset.borderColor = color;
-    dataset.backgroundColor = color + '33'; // 20% opacity (approx)
-    dataset.pointBackgroundColor = color;
-    dataset.pointHoverBorderColor = color;
-
+    // Use default colors from config (brown)
     this.lineChartData = {
       labels,
       datasets: [dataset],

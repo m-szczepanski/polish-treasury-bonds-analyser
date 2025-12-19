@@ -2,7 +2,7 @@ import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
+import { ChartConfiguration, ChartData, ChartDataset, ChartType } from 'chart.js';
 import { Bond, BondType, Constants } from '../../logic/constants';
 import { BondCalculatorService, EarlyRedemptionResult, SimulationResult } from '../../logic/bond-calculator';
 import { ChartConfigService } from '../../logic/chart-config.service';
@@ -46,34 +46,27 @@ export class PortfolioAnalysisComponent implements OnInit {
 
     // Charts
     pieChartType: ChartType = 'pie';
-    barChartType: ChartType = 'bar';
+    profitChartType: ChartType = 'line'; // Changed to line
 
     pieChartData: ChartData<'pie', number[], string | string[]> = {
         labels: [],
         datasets: [{ data: [], backgroundColor: [] }]
     };
 
-    barChartData: ChartData<'bar'> = {
+    profitChartData: ChartData<'line'> = {
         labels: [],
-        datasets: [{ data: [], label: 'Zysk Netto (PLN)', backgroundColor: '#2e7d32' }]
+        datasets: []
     };
 
     pieChartOptions: ChartConfiguration['options'] = {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: { position: 'right' }
         }
     };
 
-    barChartOptions: ChartConfiguration['options'] = {
-        responsive: true,
-        scales: {
-            y: { beginAtZero: true }
-        },
-        plugins: {
-            legend: { display: false }
-        }
-    };
+    profitChartOptions: ChartConfiguration['options'] = this.chartConfig.defaultBaseChartOptions;
 
     ngOnInit() {
         this.addBond(); // Start with one empty row
@@ -146,34 +139,53 @@ export class PortfolioAnalysisComponent implements OnInit {
         this.pieChartData.datasets[0].data = Array.from(compositionMap.values());
         this.pieChartData.datasets[0].backgroundColor = Array.from(compositionMap.keys()).map((_, i) => colors[i % colors.length]);
 
-        // 2. Bar Chart (Aggregated Profit by Type)
-        const profitMap = new Map<string, number>();
+        // 2. Line Chart (Portfolio Value over Time)
+        // We simulate up to investmentHorizon.
+        const months = Array.from({ length: this.investmentHorizon + 1 }, (_, i) => i);
+        const timelineValues = new Array(this.investmentHorizon + 1).fill(0);
 
         this.portfolio.forEach(item => {
             const bond = this.availableBonds.find(b => b.type === item.bondType);
             if (bond) {
-                let netProfit = 0;
-                if (this.investmentHorizon < bond.durationMonths) {
-                    try {
-                        const result = this.bondCalculator.simulateEarlyRedemption(bond, item.amount, this.investmentHorizon, 5.0);
-                        netProfit = result.netProfit;
-                    } catch { }
-                } else {
-                    const result = this.bondCalculator.simulate(bond, item.amount, 5.0);
-                    netProfit = result.netProfit;
+                // Get full simulation for bond duration (or horizon if longer, but usually bond defined)
+                // Actually simulate returns duration of bond.
+                // We need to handle:
+                // - if horizon <= bond duration: use simulation values up to horizon
+                // - if horizon > bond duration: use last value for remaining months (cash hold)
+
+                // We assume simulation returns array of size (duration + 1)
+                const simResult = this.bondCalculator.simulate(bond, item.amount, 5.0);
+
+                for (let m = 0; m <= this.investmentHorizon; m++) {
+                    let val = 0;
+                    if (m < simResult.values.length) {
+                        val = simResult.values[m];
+                    } else {
+                        // After maturity, assume cash value holds (last value)
+                        val = simResult.values[simResult.values.length - 1];
+                    }
+                    timelineValues[m] += val;
                 }
-                const current = profitMap.get(item.bondType) || 0;
-                profitMap.set(item.bondType, current + netProfit);
             }
         });
 
-        this.barChartData.labels = Array.from(profitMap.keys());
-        this.barChartData.datasets[0].data = Array.from(profitMap.values());
-        this.barChartData.datasets[0].backgroundColor = Array.from(profitMap.keys()).map((_, i) => colors[i % colors.length]);
+        const profitDataset = this.chartConfig.getDataset(
+            'Wartość Portfela (PLN)',
+            timelineValues,
+            true, // Primary color
+            true  // Fill
+        ) as unknown as ChartDataset<'line', number[]>;
+
+        this.profitChartData.labels = months.map(m => `M${m}`);
+        this.profitChartData.datasets = [profitDataset];
 
         // Update charts
         this.pieChartData = { ...this.pieChartData };
-        this.barChartData = { ...this.barChartData };
+        this.profitChartData = {
+            ...this.profitChartData,
+            labels: this.profitChartData.labels,
+            datasets: [profitDataset]
+        };
 
         this.generateTip();
     }
