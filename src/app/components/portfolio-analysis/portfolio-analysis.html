@@ -36,7 +36,19 @@
                 <label>Horyzont inwestycyjny: <strong>{{ investmentHorizon }} miesięcy</strong></label>
                 <div class="horizon-control">
                     <input type="range" min="1" max="120" step="1" [(ngModel)]="investmentHorizon"
-                        (ngModelChange)="calculate()" class="horizon-slider">
+                        (ngModelChange)="calculate()" class="horizon-slider" list="horizon-markers">
+                    <datalist id="horizon-markers">
+                        <option value="12" label="1 rok"></option>
+                        <option value="24" label="2 lata"></option>
+                        <option value="36" label="3 lata"></option>
+                        <option value="48" label="4 lata"></option>
+                        <option value="60" label="5 lat"></option>
+                        <option value="72" label="6 lat"></option>
+                        <option value="84" label="7 lat"></option>
+                        <option value="96" label="8 lat"></option>
+                        <option value="108" label="9 lat"></option>
+                        <option value="120" label="10 lat"></option>
+                    </datalist>
                 </div>
             </div>
         </div>
