@@ -46,6 +46,16 @@ export class StrategyCalculator {
      *   - netProfit: Net profit after tax at the end of the simulation.
      */
     static simulate(request: StrategyRequest): StrategyResult {
+        if (request.durationMonths < 0) {
+            throw new Error('Duration must be non-negative');
+        }
+        if (request.recurringAmount > 0 && request.frequencyMonths <= 0) {
+            throw new Error('Frequency must be positive if recurring amount is positive');
+        }
+        if (request.initialAmount < 0 || request.recurringAmount < 0) {
+            throw new Error('Investment amounts must be non-negative');
+        }
+
         const totalMonths = request.durationMonths;
         const months: number[] = [];
         const totalInvested: number[] = [];

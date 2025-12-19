@@ -749,4 +749,60 @@ describe('BondCalculator', () => {
             });
         });
     });
+
+    describe('Advanced Scenarios', () => {
+        describe('Inflation Edge Cases', () => {
+            it('should handle negative inflation (deflation)', () => {
+                const edoBond = Constants.BONDS.find(b => b.type === BondType.EDO)!;
+                // EDO margin is 2%, so -1% inflation + 2% margin = 1% interest
+                const deflationRate = -1.0;
+                const result = BondCalculator.simulate(edoBond, 1000, deflationRate);
+
+                // Year 1 is fixed 5.6% regardless of inflation
+                expect(result.values[12]).toBeCloseTo(1056, 2);
+
+                // Year 2: 1056 * (1.01) = 1066.56
+                expect(result.values[24]).toBeCloseTo(1066.56, 2);
+            });
+
+            it('should handle high inflation', () => {
+                const coiBond = Constants.BONDS.find(b => b.type === BondType.COI)!;
+                const hyperInflation = 20.0;
+                const result = BondCalculator.simulate(coiBond, 1000, hyperInflation);
+
+                // Year 2 rate = 20% + 1.5% = 21.5%
+                // Interest = 1000 * 0.215 = 215
+                // Year 2 Total = 1000 + 50 (Y1) + 215 = 1265
+                expect(result.values[24]).toBeCloseTo(1265, 2);
+            });
+        });
+
+        describe('Complex Early Redemption', () => {
+            const edoBond = Constants.BONDS.find(b => b.type === BondType.EDO)!;
+
+            it('should handle redemption at capitalization boundary (Month 12)', () => {
+                // Redemption exactly at month 12
+                // Should include first year capitalization?
+                // Usually logic is: Capitalize first, then redeem? Or redeem before?
+                // Our logic: simulate() calculates month 12 value WITH capitalization.
+                // simulateEarlyRedemption uses simulate().values[12].
+                // So it assumes you redeem AFTER capitalization.
+
+                const result = BondCalculator.simulateEarlyRedemption(edoBond, 1000, 12);
+
+                // Value should be 1056 (capitalized)
+                expect(result.valueAtRedemption).toBeCloseTo(1056, 2);
+
+                // Fee applies.
+                expect(result.earlyRedemptionFee).toBeGreaterThan(0);
+            });
+
+            it('should handle redemption one month before capitalization (Month 11)', () => {
+                const result = BondCalculator.simulateEarlyRedemption(edoBond, 1000, 11);
+
+                // Month 11 value is still 1000 (no cap yet).
+                expect(result.valueAtRedemption).toBe(1000);
+            });
+        });
+    });
 });
