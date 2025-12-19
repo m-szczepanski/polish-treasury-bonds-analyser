@@ -73,9 +73,17 @@ export class InvestmentStrategyComponent {
     }
 
     updateParameter(key: 'freq' | 'dur' | 'infl', value: number) {
-        if (key === 'freq') this.frequencyMonths.set(value);
-        if (key === 'dur') this.durationMonths.set(value);
-        if (key === 'infl') this.inflationRate.set(value);
+        switch (key) {
+            case 'freq':
+                this.frequencyMonths.set(value);
+                break;
+            case 'dur':
+                this.durationMonths.set(value);
+                break;
+            case 'infl':
+                this.inflationRate.set(value);
+                break;
+        }
     }
 
     toggleBond(config: BondStrategyConfig) {
