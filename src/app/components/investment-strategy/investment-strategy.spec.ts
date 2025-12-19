@@ -40,46 +40,42 @@ describe('InvestmentStrategyComponent', () => {
     });
 
     it('should select bond and update state', () => {
-        const config = component.configurations[0];
+        const configs = component.configurations();
+        const config = configs[0];
         component.toggleBond(config);
-        expect(config.isSelected).toBe(true);
+
+        const updatedConfig = component.configurations()[0];
+        expect(updatedConfig.isSelected).toBe(true);
     });
 
     it('should calculate strategy when inputs change', async () => {
-        // Select a bond
-        component.toggleBond(component.configurations[0]);
+        const config = component.configurations()[0];
+        component.toggleBond(config);
 
-        // Change duration
-        component.durationMonths = 24;
-        component.calculate();
+        component.durationMonths.set(24);
 
-        await new Promise(r => setTimeout(r, 400));
+        fixture.detectChanges();
 
-        // Verify result is updated
-        expect(component.result).toBeDefined();
+        expect(component.simulation()).toBeDefined();
     });
 
     it('should correctly aggregate multiple selected bonds', async () => {
-        component.toggleBond(component.configurations[0]); // Bond 1
-        component.toggleBond(component.configurations[1]); // Bond 2
+        const configs = component.configurations();
+        component.toggleBond(configs[0]);
+        component.toggleBond(configs[1]);
 
-        component.calculate();
+        fixture.detectChanges();
 
-        await new Promise(r => setTimeout(r, 400));
-
-        // Should have 2 individual charts
-        expect(component.individualCharts.length).toBe(2);
-        // Should have aggregate result
-        expect(component.result?.totalInvested.length).toBeGreaterThan(0);
+        expect(component.individualCharts().length).toBe(2);
+        expect(component.simulation()?.totalInvested.length).toBeGreaterThan(0);
     });
 
     it('should update chart update flag', async () => {
-        // Trigger toggle
-        component.toggleBond(component.configurations[0]);
+        const config = component.configurations()[0];
+        component.toggleBond(config);
 
-        await new Promise(r => setTimeout(r, 400));
+        fixture.detectChanges();
 
-        // Simply verify that chart data getter access doesn't crash
-        expect(component.summaryChart).toBeDefined();
+        expect(component.summaryChart()).toBeDefined();
     });
 });

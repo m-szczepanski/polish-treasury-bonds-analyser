@@ -6,16 +6,16 @@
 
   <div class="controls-section">
     <div class="slider-container">
-      <label for="global-investment">Kwota inwestycji: <strong>{{ investmentAmount | number: '1.0-0' }}
+      <label for="global-investment">Kwota inwestycji: <strong>{{ investmentAmount() | number: '1.0-0' }}
           PLN</strong></label>
-      <input id="global-investment" type="range" min="100" max="100000" step="100" [(ngModel)]="investmentAmount"
-        class="global-slider" />
+      <input id="global-investment" type="range" min="100" max="100000" step="100" [ngModel]="investmentAmount()"
+        (ngModelChange)="investmentAmount.set($event)" class="global-slider" />
     </div>
   </div>
 
   <div class="bonds-list">
     @for (bond of bonds; track bond.type) {
-    <app-bond-card [bond]="bond" [investmentAmount]="investmentAmount"></app-bond-card>
+    <app-bond-card [bond]="bond" [investmentAmount]="investmentAmount()"></app-bond-card>
     }
   </div>
 </div>

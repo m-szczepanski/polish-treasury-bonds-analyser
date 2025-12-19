@@ -42,31 +42,41 @@ describe('PortfolioAnalysisComponent', () => {
     });
 
     it('should initialize with default bond', () => {
-        expect(component.portfolio.length).toBe(1);
-        expect(component.portfolio[0].bondType).toBe(BondType.OTS);
+        expect(component.portfolio().length).toBe(1);
+        expect(component.portfolio()[0].bondType).toBe(BondType.OTS);
     });
 
     it('should calculate summary correctly', () => {
         // OTS 1000 PLN, 12 months horizon
-        component.calculate();
-        expect(component.summary.totalInvestment).toBe(1000);
-        expect(component.summary.totalProfit).toBeGreaterThan(0);
+        // Signals update automatically
+        fixture.detectChanges();
+        const summary = component.summary();
+        expect(summary.totalInvestment).toBe(1000);
+        expect(summary.totalProfit).toBeGreaterThan(0);
         // Tax is usually ~19% of profit
-        expect(component.summary.tax).toBeCloseTo(component.summary.totalProfit * 0.19, 0);
+        expect(summary.tax).toBeCloseTo(summary.totalProfit * 0.19, 0);
     });
 
     it('should update calculation when bond added', () => {
         component.addBond();
-        component.portfolio[1] = { bondType: BondType.ROR, amount: 2000 };
-        component.calculate();
+        component.updateBondType(1, BondType.ROR);
+        component.updateBondAmount(1, 2000);
 
-        expect(component.portfolio.length).toBe(2);
-        expect(component.summary.totalInvestment).toBe(3000);
+        fixture.detectChanges();
+        const summary = component.summary();
+        const portfolio = component.portfolio();
+
+        expect(portfolio.length).toBe(2);
+        expect(summary.totalInvestment).toBe(3000);
     });
 
     it('should generate charts data', () => {
-        component.calculate();
-        expect(component.pieChartData.labels?.length).toBeGreaterThan(0);
-        expect(component.barChartData.datasets[0].data.length).toBeGreaterThan(0);
+        fixture.detectChanges();
+        const pieData = component.pieChartData();
+        const profitData = component.profitChartData();
+
+        expect(pieData.labels?.length).toBeGreaterThan(0);
+        expect(profitData.labels?.length).toBeGreaterThan(0);
+        expect(profitData.datasets[0].data.length).toBeGreaterThan(0);
     });
 });

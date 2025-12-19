@@ -7,11 +7,11 @@
     <div class="input-section">
         <h2 class="section-title">Twój Portfel</h2>
 
-        @for (item of portfolio; track $index) {
+        @for (item of portfolio(); track $index) {
         <div class="bond-row">
             <div class="form-group">
                 <label>Rodzaj Obligacji</label>
-                <select [(ngModel)]="item.bondType" (ngModelChange)="calculate()" class="form-control">
+                <select [ngModel]="item.bondType" (ngModelChange)="updateBondType($index, $event)" class="form-control">
                     @for (bond of availableBonds; track bond.type) {
                     <option [value]="bond.type">{{ bond.name }} ({{bond.type}})</option>
                     }
@@ -19,10 +19,10 @@
             </div>
             <div class="form-group">
                 <label>Kwota (PLN)</label>
-                <input type="number" [(ngModel)]="item.amount" (ngModelChange)="calculate()" step="100" min="100"
-                    class="form-control">
+                <input type="number" [ngModel]="item.amount" (ngModelChange)="updateBondAmount($index, $event)"
+                    step="100" min="100" class="form-control">
             </div>
-            <button class="remove-btn" (click)="removeBond($index)" [disabled]="portfolio.length <= 1"
+            <button class="remove-btn" (click)="removeBond($index)" [disabled]="portfolio().length <= 1"
                 title="Usuń pozycję">
                 ✕
             </button>
@@ -33,10 +33,10 @@
 
         <div class="horizon-section">
             <div class="form-group">
-                <label>Horyzont inwestycyjny: <strong>{{ investmentHorizon }} miesięcy</strong></label>
+                <label>Horyzont inwestycyjny: <strong>{{ investmentHorizon() }} miesięcy</strong></label>
                 <div class="horizon-control">
-                    <input type="range" min="1" max="120" step="1" [(ngModel)]="investmentHorizon"
-                        (ngModelChange)="calculate()" class="horizon-slider" list="horizon-markers">
+                    <input type="range" min="1" max="120" step="1" [ngModel]="investmentHorizon()"
+                        (ngModelChange)="investmentHorizon.set($event)" class="horizon-slider" list="horizon-markers">
                     <datalist id="horizon-markers">
                         <option value="12" label="1 rok"></option>
                         <option value="24" label="2 lata"></option>
@@ -58,25 +58,25 @@
         <div class="summary-cards">
             <div class="summary-card">
                 <span class="summary-label">Całkowita Inwestycja</span>
-                <span class="summary-value">{{ summary.totalInvestment | number:'1.0-0' }} PLN</span>
+                <span class="summary-value">{{ summary().totalInvestment | number:'1.0-0' }} PLN</span>
             </div>
             <div class="summary-card">
                 <span class="summary-label">Zysk Brutto</span>
-                <span class="summary-value profit">+{{ summary.totalProfit | number:'1.2-2' }} PLN</span>
+                <span class="summary-value profit">+{{ summary().totalProfit | number:'1.2-2' }} PLN</span>
             </div>
             <div class="summary-card">
                 <span class="summary-label">Podatek Belki</span>
-                <span class="summary-value tax">-{{ summary.tax | number:'1.2-2' }} PLN</span>
+                <span class="summary-value tax">-{{ summary().tax | number:'1.2-2' }} PLN</span>
             </div>
             <div class="summary-card">
                 <span class="summary-label">Zysk Netto</span>
-                <span class="summary-value profit">+{{ summary.netProfit | number:'1.2-2' }} PLN</span>
+                <span class="summary-value profit">+{{ summary().netProfit | number:'1.2-2' }} PLN</span>
             </div>
         </div>
 
-        <div class="tips-section" *ngIf="optimizationTip">
+        <div class="tips-section" *ngIf="optimizationTip()">
             <div class="tips-title">💡 Wskazówka optymalizacyjna</div>
-            <p class="tip-content">{{ optimizationTip }}</p>
+            <p class="tip-content">{{ optimizationTip() }}</p>
         </div>
 
         <br>
@@ -85,14 +85,15 @@
             <div class="chart-card">
                 <h3 class="section-title">Struktura Portfela</h3>
                 <div class="chart-container">
-                    <canvas baseChart [data]="pieChartData" [options]="pieChartOptions" [type]="pieChartType">
+                    <canvas baseChart [data]="pieChartData()" [options]="pieChartOptions" [type]="pieChartType">
                     </canvas>
                 </div>
             </div>
             <div class="chart-card">
-                <h3 class="section-title">Potencjalny Zysk Netto ({{investmentHorizon}} mies.)</h3>
+                <h3 class="section-title">Symulacja Wartości w Czasie</h3>
                 <div class="chart-container">
-                    <canvas baseChart [data]="barChartData" [options]="barChartOptions" [type]="barChartType">
+                    <canvas baseChart [data]="profitChartData()" [options]="profitChartOptions"
+                        [type]="profitChartType">
                     </canvas>
                 </div>
             </div>

@@ -1,18 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BondCardComponent } from './bond-card';
 import { Bond, BondType } from '../../logic/constants';
-import { Component, Input, SimpleChange } from '@angular/core';
-
-@Component({
-  selector: 'canvas[baseChart]',
-  standalone: true,
-  template: ''
-})
-class MockBaseChartDirective {
-  @Input() data: any;
-  @Input() options: any;
-  @Input() type: any;
-}
+import { BondCalculatorService } from '../../logic/bond-calculator';
+import { ChartConfigService } from '../../logic/chart-config.service';
 
 describe('BondCardComponent', () => {
   let component: BondCardComponent;
@@ -32,15 +22,20 @@ describe('BondCardComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [BondCardComponent],
+      providers: [
+        BondCalculatorService,
+        ChartConfigService,
+      ]
     })
-      .overrideComponent(BondCardComponent, {
-        add: { imports: [MockBaseChartDirective] }
-      })
+      .overrideTemplate(BondCardComponent, '')
       .compileComponents();
 
     fixture = TestBed.createComponent(BondCardComponent);
     component = fixture.componentInstance;
-    component.bond = mockBond;
+
+    fixture.componentRef.setInput('bond', mockBond);
+    fixture.componentRef.setInput('investmentAmount', 1000);
+
     fixture.detectChanges();
   });
 
@@ -49,28 +44,27 @@ describe('BondCardComponent', () => {
   });
 
   it('should calculate simulation on init', () => {
-    expect(component.simulationResult).toBeDefined();
-    expect(component.simulationResult?.months.length).toBe(4); // 0, 1, 2, 3
+    expect(component.simulationResult()).toBeDefined();
+    expect(component.simulationResult()?.months.length).toBe(4);
   });
 
   it('should update calculation when investment amount changes', () => {
-    component.investmentAmount = 5000;
-    component.ngOnChanges({
-      investmentAmount: new SimpleChange(1000, 5000, false)
-    });
+    fixture.componentRef.setInput('investmentAmount', 5000);
+    fixture.detectChanges();
 
-    expect(component.simulationResult?.values[0]).toBe(5000);
+    expect(component.simulationResult()?.values[0]).toBe(5000);
   });
 
   it('should update chart data when calculation runs', () => {
-    component.calculate();
-    // Verify chart data is populated
+    fixture.componentRef.setInput('investmentAmount', 2000);
+    fixture.detectChanges();
+
     expect(component.lineChartData.labels?.length).toBeGreaterThan(0);
     expect(component.lineChartData.datasets[0].data.length).toBeGreaterThan(0);
   });
 
   it('should return correct profit color', () => {
-    // OTS always has positive profit
     expect(component.profitColor).toBe('#2e7d32');
   });
+
 });
