@@ -33,42 +33,17 @@ export class InvestmentStrategyComponent {
     private strategyCalculator = inject(StrategyCalculatorService);
     private chartConfig = inject(ChartConfigService);
 
-    // Signals for simplified state (could use ModelSignal for two-way binding with specific implementation, 
-    // but for now simple Signals + setters or method triggers work well with standard FormsModule if using [ngModel])
-    // Actually FormsModule works best with simple properties unless using signal-based forms. 
-    // Detailed Refactor: Keep properties for ngModel but use Signals for internal reactivity? 
-    // OR: Use Signals and manual event handling.
-    // EASIEST PATH for ngModel: Keep primitive properties, but call methods that set signals.
-    // OR: Use `model()` signal if on Angular 17.2+. Assuming modern Angular as per prompt (Angular 21?! Package.json said 19/21?).
-    // Let's stick to properties + signal triggers for calculation or `signal()` and use `.set()`.
-
-    // Going with standard properties bound to ngModel, but using a signal to trigger calculation effect?
-    // Let's make "configurations" a signal?
-
     frequencyMonths = signal(1);
     durationMonths = signal(12);
     inflationRate = signal(4.5);
 
-    // Configurations state - array of objects.
-    // Since objects are mutable, we need careful handling or immutable updates.
     configurations = signal<BondStrategyConfig[]>(this.initializeConfigurations());
 
-    // Computed result
     simulation = computed(() => {
         const freq = this.frequencyMonths();
         const dur = this.durationMonths();
         const infl = this.inflationRate();
         const configs = this.configurations();
-
-        // Debounce? computed is synchronous. 
-        // If we want debounce, we might need an effect that writes to a signal after delay.
-        // For simpler archi, let's keep debounce logic or assume Signals are fast enough for this calc size.
-        // But UI input (slider) can spam. 
-        // Let's compute SIMULATIONS synchronously but update CHART signals debounced?
-        // Or just implement debounce via RxJS toSignal?
-
-        // Let's do: Effect observes [freq, dur, infl, configs] -> sets a "debouncedTrigger" signal?
-        // Actually, just calculating strategy is fast. Chart rendering is slow.
 
         return this.performCalculation(freq, dur, infl, configs);
     });
@@ -88,7 +63,6 @@ export class InvestmentStrategyComponent {
     public lineChartType: ChartType = 'line';
 
     constructor() {
-        // No manual calculate() call needed, computed signals derive state automatically.
     }
 
     private initializeConfigurations(): BondStrategyConfig[] {
@@ -101,12 +75,6 @@ export class InvestmentStrategyComponent {
         }));
     }
 
-    // Methods bound to UI events (sliders, checkboxes)
-    // Since we use signals for primitives, we need (ngModelChange).
-    // Or getters/setters wrapping signals for ngModel?
-    // Let's use getters/setters for cleaner HTML if we don't change HTML much.
-    // Or just update HTML to use [ngModel]="val()" (ngModelChange)="val.set($event)".
-
     updateKwargs(key: 'freq' | 'dur' | 'infl', value: number) {
         if (key === 'freq') this.frequencyMonths.set(value);
         if (key === 'dur') this.durationMonths.set(value);
@@ -114,7 +82,6 @@ export class InvestmentStrategyComponent {
     }
 
     toggleBond(config: BondStrategyConfig) {
-        // We need to update the configuration array immutably to trigger signal
         const current = this.configurations();
         const index = current.indexOf(config);
         if (index > -1) {
@@ -185,7 +152,7 @@ export class InvestmentStrategyComponent {
             totalInvested,
             totalProfit: aggTotalProfit,
             netProfit: aggNetProfit,
-            simulations // Keep individual ref
+            simulations
         };
     }
 
@@ -216,8 +183,6 @@ export class InvestmentStrategyComponent {
         };
     }
 
-    // Getters for template to avoid calling signals directly? No, template can call signals.
-    // Propierty getter for result
     get totalProfit(): number {
         return this.simulation()?.totalProfit ?? 0;
     }

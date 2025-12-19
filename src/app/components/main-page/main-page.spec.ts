@@ -65,8 +65,6 @@ describe('MainPageComponent', () => {
 
     const bondCards = fixture.nativeElement.querySelectorAll('app-bond-card');
     expect(bondCards.length).toBeGreaterThan(0);
-    // Note: Since we're using a mock component, we can't directly test the input binding,
-    // but we verify that the bond cards are rendered with the template
   });
 
   it('should render bond cards for all bonds', () => {

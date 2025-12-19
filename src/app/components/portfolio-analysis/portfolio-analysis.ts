@@ -46,7 +46,7 @@ export class PortfolioAnalysisComponent implements OnInit {
 
     // Charts
     pieChartType: ChartType = 'pie';
-    profitChartType: ChartType = 'line'; // Changed to line
+    profitChartType: ChartType = 'line';
 
     pieChartData: ChartData<'pie', number[], string | string[]> = {
         labels: [],
@@ -69,7 +69,7 @@ export class PortfolioAnalysisComponent implements OnInit {
     profitChartOptions: ChartConfiguration['options'] = this.chartConfig.defaultBaseChartOptions;
 
     ngOnInit() {
-        this.addBond(); // Start with one empty row
+        this.addBond();
         this.calculate();
     }
 
@@ -90,35 +90,28 @@ export class PortfolioAnalysisComponent implements OnInit {
         const compositionMap = new Map<string, number>();
 
         this.portfolio.forEach((item, index) => {
-            // Composition
             const currentAmount = compositionMap.get(item.bondType) || 0;
             compositionMap.set(item.bondType, currentAmount + item.amount);
 
             this.summary.totalInvestment += item.amount;
 
-            // Calculation
             const bond = this.availableBonds.find(b => b.type === item.bondType);
             if (bond) {
                 let netProfit = 0;
                 let tax = 0;
                 let grossProfit = 0;
 
-                // If horizon < duration, simulate early redemption
                 if (this.investmentHorizon < bond.durationMonths) {
                     try {
-                        // Use 5% inflation as default assumption
                         const result = this.bondCalculator.simulateEarlyRedemption(bond, item.amount, this.investmentHorizon, 5.0);
                         netProfit = result.netProfit;
                         tax = result.tax;
-                        grossProfit = result.grossProfit - result.earlyRedemptionFee; // Effective gross after fee
+                        grossProfit = result.grossProfit - result.earlyRedemptionFee;
                     } catch (e) {
                         console.error(e);
                     }
                 } else {
-                    // Full duration simulation
                     const result = this.bondCalculator.simulate(bond, item.amount, 5.0);
-                    // Result arrays are 0-indexed (month 0 to duration)
-                    // If horizon > duration, take last value (assuming cash hold)
                     grossProfit = result.totalProfit;
                     netProfit = result.netProfit;
 
@@ -134,26 +127,16 @@ export class PortfolioAnalysisComponent implements OnInit {
         // Generate Chart Data
         const colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b'];
 
-        // 1. Pie Chart
         this.pieChartData.labels = Array.from(compositionMap.keys());
         this.pieChartData.datasets[0].data = Array.from(compositionMap.values());
         this.pieChartData.datasets[0].backgroundColor = Array.from(compositionMap.keys()).map((_, i) => colors[i % colors.length]);
 
-        // 2. Line Chart (Portfolio Value over Time)
-        // We simulate up to investmentHorizon.
         const months = Array.from({ length: this.investmentHorizon + 1 }, (_, i) => i);
         const timelineValues = new Array(this.investmentHorizon + 1).fill(0);
 
         this.portfolio.forEach(item => {
             const bond = this.availableBonds.find(b => b.type === item.bondType);
             if (bond) {
-                // Get full simulation for bond duration (or horizon if longer, but usually bond defined)
-                // Actually simulate returns duration of bond.
-                // We need to handle:
-                // - if horizon <= bond duration: use simulation values up to horizon
-                // - if horizon > bond duration: use last value for remaining months (cash hold)
-
-                // We assume simulation returns array of size (duration + 1)
                 const simResult = this.bondCalculator.simulate(bond, item.amount, 5.0);
 
                 for (let m = 0; m <= this.investmentHorizon; m++) {
@@ -161,7 +144,6 @@ export class PortfolioAnalysisComponent implements OnInit {
                     if (m < simResult.values.length) {
                         val = simResult.values[m];
                     } else {
-                        // After maturity, assume cash value holds (last value)
                         val = simResult.values[simResult.values.length - 1];
                     }
                     timelineValues[m] += val;
@@ -179,7 +161,6 @@ export class PortfolioAnalysisComponent implements OnInit {
         this.profitChartData.labels = months.map(m => `M${m}`);
         this.profitChartData.datasets = [profitDataset];
 
-        // Update charts
         this.pieChartData = { ...this.pieChartData };
         this.profitChartData = {
             ...this.profitChartData,

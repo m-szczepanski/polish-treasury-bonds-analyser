@@ -27,7 +27,6 @@ export class BondCardComponent {
     const amount = this.investmentAmount();
     if (!bond) return null;
 
-    // Default inflation assumption 5% for simulation if indexed
     const inflation = 5.0;
     return this.bondCalculator.simulate(bond, amount, inflation);
   });
@@ -52,14 +51,12 @@ export class BondCardComponent {
   private updateChart(result: SimulationResult): void {
     const labels = result.months.map((m) => `M${m}`);
 
-    // Get default dataset structure
     const dataset = this.chartConfig.getDataset(
       'Wartość inwestycji (PLN)',
       result.values,
-      true // Use primary theme as base
+      true
     ) as unknown as ChartDataset<'line', number[]>;
 
-    // Use default colors from config (brown)
     this.lineChartData = {
       labels,
       datasets: [dataset],

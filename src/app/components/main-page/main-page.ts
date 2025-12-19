@@ -13,6 +13,6 @@ import { Constants } from '../../logic/constants';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainPageComponent {
-  bonds = Constants.BONDS; // Constant, no signal needed for list itself if static
+  bonds = Constants.BONDS;
   investmentAmount = signal(1000);
 }
