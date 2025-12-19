@@ -1,10 +1,11 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, computed, effect, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
+import { ChartConfiguration, ChartData, ChartDataset, ChartType } from 'chart.js';
 import { Bond } from '../../logic/constants';
-import { BondCalculator, SimulationResult } from '../../logic/bond-calculator';
+import { BondCalculatorService, SimulationResult } from '../../logic/bond-calculator';
+import { ChartConfigService } from '../../logic/chart-config.service';
 
 @Component({
   selector: 'app-bond-card',
@@ -12,84 +13,66 @@ import { BondCalculator, SimulationResult } from '../../logic/bond-calculator';
   imports: [CommonModule, FormsModule, BaseChartDirective],
   templateUrl: './bond-card.html',
   styleUrl: './bond-card.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BondCardComponent implements OnInit, OnChanges {
-  @Input() bond!: Bond;
-  @Input() investmentAmount = 1000;
-  simulationResult: SimulationResult | null = null;
+export class BondCardComponent {
+  private bondCalculator = inject(BondCalculatorService);
+  private chartConfig = inject(ChartConfigService);
 
-  public lineChartData: ChartData<'line'> = {
-    labels: [],
-    datasets: [
-      {
-        data: [],
-        label: 'Wartość inwestycji (PLN)',
-        backgroundColor: 'rgba(139, 69, 19, 0.2)',
-        borderColor: 'rgba(139, 69, 19, 1)',
-        pointBackgroundColor: 'rgba(139, 69, 19, 1)',
-        pointBorderColor: '#fff',
-        pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: 'rgba(139, 69, 19, 0.8)',
-        fill: 'origin',
-      },
-    ],
-  };
+  bond = input.required<Bond>();
+  investmentAmount = input<number>(1000);
 
-  public lineChartOptions: ChartConfiguration['options'] = {
-    elements: {
-      line: {
-        tension: 0.4,
-      },
-    },
-    scales: {
-      x: {
-        grid: {
-          display: false,
-        },
-      },
-      y: {
-        grid: {
-          color: 'rgba(0,0,0,0.05)',
-        },
-      },
-    },
-    plugins: {
-      legend: { display: false },
-    },
-  };
-
-  public lineChartType: ChartType = 'line';
-
-  ngOnInit(): void {
-    this.calculate();
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['bond'] || changes['investmentAmount']) {
-      this.calculate();
-    }
-  }
-
-  calculate(): void {
-    if (!this.bond) return;
+  simulationResult = computed(() => {
+    const bond = this.bond();
+    const amount = this.investmentAmount();
+    if (!bond) return null;
 
     // Default inflation assumption 5% for simulation if indexed
     const inflation = 5.0;
-    this.simulationResult = BondCalculator.simulate(this.bond, this.investmentAmount, inflation);
+    return this.bondCalculator.simulate(bond, amount, inflation);
+  });
 
-    this.updateChart();
+  public lineChartData: ChartData<'line'> = {
+    labels: [],
+    datasets: []
+  };
+
+  public lineChartOptions: ChartConfiguration['options'] = this.chartConfig.defaultBaseChartOptions;
+  public lineChartType: ChartType = 'line';
+
+  constructor() {
+    effect(() => {
+      const result = this.simulationResult();
+      if (result) {
+        this.updateChart(result);
+      }
+    });
   }
 
-  private updateChart(): void {
-    if (!this.simulationResult) return;
+  private updateChart(result: SimulationResult): void {
+    const labels = result.months.map((m) => `M${m}`);
 
-    this.lineChartData.labels = this.simulationResult.months.map((m) => `M${m}`);
-    this.lineChartData.datasets[0].data = this.simulationResult.values;
+    // Get default dataset structure
+    const dataset = this.chartConfig.getDataset(
+      'Wartość inwestycji (PLN)',
+      result.values,
+      true // Use primary theme as base
+    ) as unknown as ChartDataset<'line', number[]>;
 
-    this.lineChartData = { ...this.lineChartData };
+    // Override colors based on profit (Green/Red)
+    const color = this.profitColor;
+    dataset.borderColor = color;
+    dataset.backgroundColor = color + '33'; // 20% opacity (approx)
+    dataset.pointBackgroundColor = color;
+    dataset.pointHoverBorderColor = color;
+
+    this.lineChartData = {
+      labels,
+      datasets: [dataset],
+    };
   }
 
   get profitColor(): string {
-    return (this.simulationResult?.netProfit ?? 0) > 0 ? '#2e7d32' : '#d32f2f';
+    return (this.simulationResult()?.netProfit ?? 0) > 0 ? '#2e7d32' : '#d32f2f';
   }
 }

@@ -1,13 +1,29 @@
-import { StrategyCalculator, StrategyRequest } from './strategy-calculator';
+import { TestBed } from '@angular/core/testing';
+import { StrategyCalculatorService, StrategyRequest } from './strategy-calculator';
+import { BondCalculatorService } from './bond-calculator';
 import { BondType, Constants } from './constants';
 
-describe('StrategyCalculator', () => {
+describe('StrategyCalculatorService', () => {
+    let service: StrategyCalculatorService;
+    let bondService: BondCalculatorService;
+
     const otsBond = Constants.BONDS.find(b => b.type === BondType.OTS)!;
     const tosBond = Constants.BONDS.find(b => b.type === BondType.TOS)!;
     const edoBond = Constants.BONDS.find(b => b.type === BondType.EDO)!;
 
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [
+                StrategyCalculatorService,
+                BondCalculatorService
+            ]
+        });
+        service = TestBed.inject(StrategyCalculatorService);
+        bondService = TestBed.inject(BondCalculatorService);
+    });
+
     it('should handle single initial investment correctly (no recurring)', () => {
-        const result = StrategyCalculator.simulate({
+        const result = service.simulate({
             bond: otsBond,
             initialAmount: 1000,
             recurringAmount: 0,
@@ -37,7 +53,7 @@ describe('StrategyCalculator', () => {
             reinvest: false
         };
 
-        const result = StrategyCalculator.simulate(request);
+        const result = service.simulate(request);
 
         expect(result.totalInvested[0]).toBe(1000);
         expect(result.totalInvested[11]).toBe(12000);
@@ -46,7 +62,7 @@ describe('StrategyCalculator', () => {
     });
 
     it('should handle recurring investment at month 0 with both initial and recurring amounts', () => {
-        const result = StrategyCalculator.simulate({
+        const result = service.simulate({
             bond: otsBond,
             initialAmount: 500,
             recurringAmount: 1000,
@@ -73,7 +89,7 @@ describe('StrategyCalculator', () => {
             reinvest: false
         };
 
-        const result = StrategyCalculator.simulate(request);
+        const result = service.simulate(request);
 
         expect(result.totalInvested[12]).toBe(3000);
         expect(result.totalValue[12]).toBeGreaterThan(3000);
@@ -91,7 +107,7 @@ describe('StrategyCalculator', () => {
                 reinvest: false
             };
 
-            const result = StrategyCalculator.simulate(request);
+            const result = service.simulate(request);
 
             expect(result.totalProfit).toBeGreaterThan(0);
             expect(result.netProfit).toBeGreaterThan(0);
@@ -116,7 +132,7 @@ describe('StrategyCalculator', () => {
                 reinvest: false
             };
 
-            const result = StrategyCalculator.simulate(request);
+            const result = service.simulate(request);
             const finalValue = result.totalValue[24];
 
             expect(result.months.length).toBe(25);
@@ -127,7 +143,7 @@ describe('StrategyCalculator', () => {
 
     describe('Reinvestment Logic', () => {
         it('should reinvest payouts when enabled', () => {
-            const resultNoReinvest = StrategyCalculator.simulate({
+            const resultNoReinvest = service.simulate({
                 bond: otsBond,
                 initialAmount: 1000,
                 recurringAmount: 0,
@@ -137,7 +153,7 @@ describe('StrategyCalculator', () => {
                 reinvest: false
             });
 
-            const resultReinvest = StrategyCalculator.simulate({
+            const resultReinvest = service.simulate({
                 bond: otsBond,
                 initialAmount: 1000,
                 recurringAmount: 0,
@@ -163,7 +179,7 @@ describe('StrategyCalculator', () => {
                     inflationRate: 0,
                     reinvest: false
                 };
-                const result = StrategyCalculator.simulate(request);
+                const result = service.simulate(request);
                 expect(result.months.length).toBe(1); // just month 0
                 expect(result.totalInvested[0]).toBe(1000);
             });

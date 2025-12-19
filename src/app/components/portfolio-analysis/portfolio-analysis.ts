@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { Bond, BondType, Constants } from '../../logic/constants';
-import { BondCalculator, EarlyRedemptionResult, SimulationResult } from '../../logic/bond-calculator';
+import { BondCalculatorService, EarlyRedemptionResult, SimulationResult } from '../../logic/bond-calculator';
+import { ChartConfigService } from '../../logic/chart-config.service';
 
 interface PortfolioItem {
     bondType: BondType;
@@ -24,8 +25,12 @@ interface PortfolioSummary {
     imports: [CommonModule, FormsModule, BaseChartDirective],
     templateUrl: './portfolio-analysis.html',
     styleUrl: './portfolio-analysis.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PortfolioAnalysisComponent implements OnInit {
+    private bondCalculator = inject(BondCalculatorService);
+    private chartConfig = inject(ChartConfigService);
+
     availableBonds = Constants.BONDS;
     portfolio: PortfolioItem[] = [];
     investmentHorizon = 12; // months
@@ -109,7 +114,7 @@ export class PortfolioAnalysisComponent implements OnInit {
                 if (this.investmentHorizon < bond.durationMonths) {
                     try {
                         // Use 5% inflation as default assumption
-                        const result = BondCalculator.simulateEarlyRedemption(bond, item.amount, this.investmentHorizon, 5.0);
+                        const result = this.bondCalculator.simulateEarlyRedemption(bond, item.amount, this.investmentHorizon, 5.0);
                         netProfit = result.netProfit;
                         tax = result.tax;
                         grossProfit = result.grossProfit - result.earlyRedemptionFee; // Effective gross after fee
@@ -118,7 +123,7 @@ export class PortfolioAnalysisComponent implements OnInit {
                     }
                 } else {
                     // Full duration simulation
-                    const result = BondCalculator.simulate(bond, item.amount, 5.0);
+                    const result = this.bondCalculator.simulate(bond, item.amount, 5.0);
                     // Result arrays are 0-indexed (month 0 to duration)
                     // If horizon > duration, take last value (assuming cash hold)
                     grossProfit = result.totalProfit;
@@ -150,11 +155,11 @@ export class PortfolioAnalysisComponent implements OnInit {
                 let netProfit = 0;
                 if (this.investmentHorizon < bond.durationMonths) {
                     try {
-                        const result = BondCalculator.simulateEarlyRedemption(bond, item.amount, this.investmentHorizon, 5.0);
+                        const result = this.bondCalculator.simulateEarlyRedemption(bond, item.amount, this.investmentHorizon, 5.0);
                         netProfit = result.netProfit;
                     } catch { }
                 } else {
-                    const result = BondCalculator.simulate(bond, item.amount, 5.0);
+                    const result = this.bondCalculator.simulate(bond, item.amount, 5.0);
                     netProfit = result.netProfit;
                 }
                 const current = profitMap.get(item.bondType) || 0;

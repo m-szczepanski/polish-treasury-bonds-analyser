@@ -1,7 +1,17 @@
-import { BondCalculator } from './bond-calculator';
+import { TestBed } from '@angular/core/testing';
+import { BondCalculatorService, BondCalculatorService as BondCalculator } from './bond-calculator';
 import { Bond, BondType, Constants } from './constants';
 
-describe('BondCalculator', () => {
+describe('BondCalculatorService', () => {
+    let service: BondCalculatorService;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [BondCalculatorService]
+        });
+        service = TestBed.inject(BondCalculatorService);
+    });
+
     describe('simulate', () => {
         describe('OTS - 3-month bond with capitalization at maturity', () => {
             const otsBond: Bond = {
@@ -16,7 +26,7 @@ describe('BondCalculator', () => {
             };
 
             it('should calculate correct value for 1000 PLN investment', () => {
-                const result = BondCalculator.simulate(otsBond, 1000);
+                const result = service.simulate(otsBond, 1000);
 
                 // Month 0: 1000
                 expect(result.months[0]).toBe(0);
@@ -40,7 +50,7 @@ describe('BondCalculator', () => {
             });
 
             it('should calculate correct value for 5000 PLN investment', () => {
-                const result = BondCalculator.simulate(otsBond, 5000);
+                const result = service.simulate(otsBond, 5000);
 
                 // Interest = 5000 * 0.04 * (3/12) = 50
                 const expectedProfit = 50;
@@ -64,7 +74,7 @@ describe('BondCalculator', () => {
             };
 
             it('should accumulate monthly interest payments correctly', () => {
-                const result = BondCalculator.simulate(rorBond, 1000);
+                const result = service.simulate(rorBond, 1000);
 
                 // Month 0: 1000
                 expect(result.values[0]).toBe(1000);
@@ -90,7 +100,7 @@ describe('BondCalculator', () => {
             });
 
             it('should handle different investment amounts', () => {
-                const result = BondCalculator.simulate(rorBond, 10000);
+                const result = service.simulate(rorBond, 10000);
 
                 // Total interest = 10000 * 0.06 = 600
                 expect(result.totalProfit).toBeCloseTo(600, 2);
@@ -113,7 +123,7 @@ describe('BondCalculator', () => {
             };
 
             it('should calculate compound interest with annual capitalization', () => {
-                const result = BondCalculator.simulate(tosBond, 1000);
+                const result = service.simulate(tosBond, 1000);
 
                 // Month 0: 1000
                 expect(result.values[0]).toBe(1000);
@@ -156,7 +166,7 @@ describe('BondCalculator', () => {
 
             it('should use fixed rate for year 1, then inflation + margin', () => {
                 const inflation = 3.0; // Assume 3% inflation
-                const result = BondCalculator.simulate(coiBond, 1000, inflation);
+                const result = service.simulate(coiBond, 1000, inflation);
 
                 // Month 0: 1000
                 expect(result.values[0]).toBe(1000);
@@ -185,7 +195,7 @@ describe('BondCalculator', () => {
 
             it('should adapt to different inflation rates', () => {
                 const highInflation = 8.0; // 8% inflation
-                const result = BondCalculator.simulate(coiBond, 1000, highInflation);
+                const result = service.simulate(coiBond, 1000, highInflation);
 
                 // Year 1: 50 (fixed 5%)
                 // Year 2: 1000 * (8% + 1.5%) = 95
@@ -211,7 +221,7 @@ describe('BondCalculator', () => {
 
             it('should capitalize interest annually with inflation indexing', () => {
                 const inflation = 4.0; // 4% inflation
-                const result = BondCalculator.simulate(edoBond, 1000, inflation);
+                const result = service.simulate(edoBond, 1000, inflation);
 
                 // Month 0: 1000
                 expect(result.values[0]).toBe(1000);
@@ -234,7 +244,7 @@ describe('BondCalculator', () => {
 
             it('should handle the full 10-year duration', () => {
                 const inflation = 3.0;
-                const result = BondCalculator.simulate(edoBond, 10000, inflation);
+                const result = service.simulate(edoBond, 10000, inflation);
 
                 // Should have 121 data points (0 to 120 months)
                 expect(result.months.length).toBe(121);
@@ -261,7 +271,7 @@ describe('BondCalculator', () => {
                     earlyRedemptionFee: 0,
                 };
 
-                const result = BondCalculator.simulate(bond, 1000);
+                const result = service.simulate(bond, 1000);
 
                 // Profit = 1000 * 0.10 * (12/12) = 100
                 expect(result.totalProfit).toBeCloseTo(100, 2);
@@ -286,7 +296,7 @@ describe('BondCalculator', () => {
                     earlyRedemptionFee: 0,
                 };
 
-                const result = BondCalculator.simulate(bond, 1000);
+                const result = service.simulate(bond, 1000);
 
                 // No profit, no loss
                 expect(result.totalProfit).toBe(0);
@@ -297,7 +307,7 @@ describe('BondCalculator', () => {
         describe('Edge cases', () => {
             it('should handle zero investment amount', () => {
                 const bond: Bond = Constants.BONDS[0];
-                const result = BondCalculator.simulate(bond, 0);
+                const result = service.simulate(bond, 0);
 
                 expect(result.values[0]).toBe(0);
                 expect(result.totalProfit).toBe(0);
@@ -306,7 +316,7 @@ describe('BondCalculator', () => {
 
             it('should handle very small investment amounts', () => {
                 const bond: Bond = Constants.BONDS[0];
-                const result = BondCalculator.simulate(bond, 1);
+                const result = service.simulate(bond, 1);
 
                 expect(result.values[0]).toBe(1);
                 expect(result.totalProfit).toBeGreaterThanOrEqual(0);
@@ -314,7 +324,7 @@ describe('BondCalculator', () => {
 
             it('should handle very large investment amounts', () => {
                 const bond: Bond = Constants.BONDS[0];
-                const result = BondCalculator.simulate(bond, 1000000);
+                const result = service.simulate(bond, 1000000);
 
                 expect(result.values[0]).toBe(1000000);
                 expect(result.values[result.values.length - 1]).toBeGreaterThan(1000000);
@@ -324,7 +334,7 @@ describe('BondCalculator', () => {
         describe('Array consistency', () => {
             it('should have matching lengths for months and values arrays', () => {
                 const bond: Bond = Constants.BONDS[0];
-                const result = BondCalculator.simulate(bond, 1000);
+                const result = service.simulate(bond, 1000);
 
                 expect(result.months.length).toBe(result.values.length);
             });
@@ -341,7 +351,7 @@ describe('BondCalculator', () => {
                     earlyRedemptionFee: 0,
                 };
 
-                const result = BondCalculator.simulate(bond, 1000);
+                const result = service.simulate(bond, 1000);
 
                 // Should have 13 points (0 through 12)
                 expect(result.months.length).toBe(13);
@@ -351,7 +361,7 @@ describe('BondCalculator', () => {
 
             it('should have monotonically increasing or equal values', () => {
                 const bond: Bond = Constants.BONDS[0];
-                const result = BondCalculator.simulate(bond, 1000);
+                const result = service.simulate(bond, 1000);
 
                 for (let i = 1; i < result.values.length; i++) {
                     expect(result.values[i]).toBeGreaterThanOrEqual(result.values[i - 1]);
@@ -362,7 +372,7 @@ describe('BondCalculator', () => {
         describe('Real bond configurations from Constants', () => {
             it('should calculate correctly for all bonds in Constants.BONDS', () => {
                 Constants.BONDS.forEach((bond) => {
-                    const result = BondCalculator.simulate(bond, 1000, 5.0);
+                    const result = service.simulate(bond, 1000, 5.0);
 
                     expect(result.months.length).toBe(bond.durationMonths + 1);
                     expect(result.values.length).toBe(bond.durationMonths + 1);
@@ -388,7 +398,7 @@ describe('BondCalculator', () => {
             };
 
             it('should calculate early redemption correctly for bond with no fee', () => {
-                const result = BondCalculator.simulateEarlyRedemption(otsBond, 1000, 1);
+                const result = service.simulateEarlyRedemption(otsBond, 1000, 1);
 
                 // At month 1, OTS hasn't capitalized interest yet, so value = 1000
                 expect(result.valueAtRedemption).toBe(1000);
@@ -400,7 +410,7 @@ describe('BondCalculator', () => {
             });
 
             it('should calculate early redemption at month 2 for OTS', () => {
-                const result = BondCalculator.simulateEarlyRedemption(otsBond, 1000, 2);
+                const result = service.simulateEarlyRedemption(otsBond, 1000, 2);
 
                 // Still no interest at month 2 for OTS
                 expect(result.valueAtRedemption).toBe(1000);
@@ -423,7 +433,7 @@ describe('BondCalculator', () => {
             };
 
             it('should apply early redemption fee correctly', () => {
-                const result = BondCalculator.simulateEarlyRedemption(rorBond, 1000, 6);
+                const result = service.simulateEarlyRedemption(rorBond, 1000, 6);
 
                 // After 6 months: 1000 + (1000 * 0.06/12 * 6) = 1000 + 30 = 1030
                 expect(result.valueAtRedemption).toBeCloseTo(1030, 2);
@@ -443,7 +453,7 @@ describe('BondCalculator', () => {
             });
 
             it('should handle different investment amounts', () => {
-                const result = BondCalculator.simulateEarlyRedemption(rorBond, 10000, 6);
+                const result = service.simulateEarlyRedemption(rorBond, 10000, 6);
 
                 // Value: 10000 + (10000 * 0.06/12 * 6) = 10300
                 expect(result.valueAtRedemption).toBeCloseTo(10300, 2);
@@ -460,8 +470,8 @@ describe('BondCalculator', () => {
             });
 
             it('should handle redemption at different months', () => {
-                const result3 = BondCalculator.simulateEarlyRedemption(rorBond, 1000, 3);
-                const result9 = BondCalculator.simulateEarlyRedemption(rorBond, 1000, 9);
+                const result3 = service.simulateEarlyRedemption(rorBond, 1000, 3);
+                const result9 = service.simulateEarlyRedemption(rorBond, 1000, 9);
 
                 // Month 3: 1000 + 15 = 1015
                 expect(result3.valueAtRedemption).toBeCloseTo(1015, 2);
@@ -487,7 +497,7 @@ describe('BondCalculator', () => {
             };
 
             it('should calculate early redemption before first capitalization', () => {
-                const result = BondCalculator.simulateEarlyRedemption(tosBond, 1000, 6);
+                const result = service.simulateEarlyRedemption(tosBond, 1000, 6);
 
                 // Before year 1, no capitalization yet
                 expect(result.valueAtRedemption).toBe(1000);
@@ -505,7 +515,7 @@ describe('BondCalculator', () => {
             });
 
             it('should calculate early redemption after first capitalization', () => {
-                const result = BondCalculator.simulateEarlyRedemption(tosBond, 1000, 18);
+                const result = service.simulateEarlyRedemption(tosBond, 1000, 18);
 
                 // After 1 year: 1050, then flat until month 24
                 expect(result.valueAtRedemption).toBeCloseTo(1050, 2);
@@ -522,7 +532,7 @@ describe('BondCalculator', () => {
             });
 
             it('should calculate early redemption after two years', () => {
-                const result = BondCalculator.simulateEarlyRedemption(tosBond, 1000, 30);
+                const result = service.simulateEarlyRedemption(tosBond, 1000, 30);
 
                 // After 2 years: 1050 * 1.05 = 1102.5
                 expect(result.valueAtRedemption).toBeCloseTo(1102.5, 2);
@@ -549,7 +559,7 @@ describe('BondCalculator', () => {
 
             it('should handle early redemption during first year', () => {
                 const inflation = 3.0;
-                const result = BondCalculator.simulateEarlyRedemption(coiBond, 1000, 6, inflation);
+                const result = service.simulateEarlyRedemption(coiBond, 1000, 6, inflation);
 
                 // No interest paid yet at month 6
                 expect(result.valueAtRedemption).toBe(1000);
@@ -563,7 +573,7 @@ describe('BondCalculator', () => {
 
             it('should handle early redemption after year 1 with inflation adjustment', () => {
                 const inflation = 4.0;
-                const result = BondCalculator.simulateEarlyRedemption(coiBond, 1000, 18, inflation);
+                const result = service.simulateEarlyRedemption(coiBond, 1000, 18, inflation);
 
                 // Year 1: 1000 + 50 (5% interest) = 1050
                 // COI pays interest, doesn't capitalize
@@ -578,7 +588,7 @@ describe('BondCalculator', () => {
 
             it('should handle early redemption in year 3 with inflation', () => {
                 const inflation = 5.0;
-                const result = BondCalculator.simulateEarlyRedemption(coiBond, 1000, 30, inflation);
+                const result = service.simulateEarlyRedemption(coiBond, 1000, 30, inflation);
 
                 // Year 1: 1050 (5%)
                 // Year 2: 1050 + 65 (5% + 1.5% = 6.5%) = 1115
@@ -601,7 +611,7 @@ describe('BondCalculator', () => {
 
             it('should apply higher fee for EDO bonds', () => {
                 const inflation = 3.0;
-                const result = BondCalculator.simulateEarlyRedemption(edoBond, 1000, 6, inflation);
+                const result = service.simulateEarlyRedemption(edoBond, 1000, 6, inflation);
 
                 // Fee = 2.0 * 1000 / 100 = 20 PLN
                 expect(result.earlyRedemptionFee).toBeCloseTo(20, 2);
@@ -614,7 +624,7 @@ describe('BondCalculator', () => {
 
             it('should calculate early redemption after several years', () => {
                 const inflation = 4.0;
-                const result = BondCalculator.simulateEarlyRedemption(edoBond, 10000, 60, inflation);
+                const result = service.simulateEarlyRedemption(edoBond, 10000, 60, inflation);
 
                 // After 5 years with compounding
                 // Year 1: 10600 (6%)
@@ -646,28 +656,28 @@ describe('BondCalculator', () => {
 
             it('should throw error for redemption at month 0', () => {
                 expect(() => {
-                    BondCalculator.simulateEarlyRedemption(testBond, 1000, 0);
+                    service.simulateEarlyRedemption(testBond, 1000, 0);
                 }).toThrow();
             });
 
             it('should throw error for redemption at or after maturity', () => {
                 expect(() => {
-                    BondCalculator.simulateEarlyRedemption(testBond, 1000, 12);
+                    service.simulateEarlyRedemption(testBond, 1000, 12);
                 }).toThrow();
 
                 expect(() => {
-                    BondCalculator.simulateEarlyRedemption(testBond, 1000, 13);
+                    service.simulateEarlyRedemption(testBond, 1000, 13);
                 }).toThrow();
             });
 
             it('should throw error for negative redemption month', () => {
                 expect(() => {
-                    BondCalculator.simulateEarlyRedemption(testBond, 1000, -1);
+                    service.simulateEarlyRedemption(testBond, 1000, -1);
                 }).toThrow();
             });
 
             it('should handle zero investment amount', () => {
-                const result = BondCalculator.simulateEarlyRedemption(testBond, 0, 6);
+                const result = service.simulateEarlyRedemption(testBond, 0, 6);
 
                 expect(result.valueAtRedemption).toBe(0);
                 expect(result.earlyRedemptionFee).toBe(0);
@@ -675,14 +685,14 @@ describe('BondCalculator', () => {
             });
 
             it('should handle very small investment amounts', () => {
-                const result = BondCalculator.simulateEarlyRedemption(testBond, 1, 6);
+                const result = service.simulateEarlyRedemption(testBond, 1, 6);
 
                 expect(result.valueAtRedemption).toBeGreaterThanOrEqual(1);
                 expect(result.earlyRedemptionFee).toBeCloseTo(0.005, 3); // 0.5 * 1 / 100
             });
 
             it('should always have netProceeds = valueAtRedemption - fee - tax', () => {
-                const result = BondCalculator.simulateEarlyRedemption(testBond, 5000, 8);
+                const result = service.simulateEarlyRedemption(testBond, 5000, 8);
 
                 const calculatedNetProceeds =
                     result.valueAtRedemption - result.earlyRedemptionFee - result.tax;
@@ -691,7 +701,7 @@ describe('BondCalculator', () => {
 
             it('should always have netProfit = netProceeds - initialAmount', () => {
                 const initialAmount = 5000;
-                const result = BondCalculator.simulateEarlyRedemption(testBond, initialAmount, 8);
+                const result = service.simulateEarlyRedemption(testBond, initialAmount, 8);
 
                 const calculatedNetProfit = result.netProceeds - initialAmount;
                 expect(result.netProfit).toBeCloseTo(calculatedNetProfit, 2);
@@ -711,7 +721,7 @@ describe('BondCalculator', () => {
                     earlyRedemptionFee: 5.0, // High fee: 5 PLN per 100 PLN
                 };
 
-                const result = BondCalculator.simulateEarlyRedemption(highFeeBond, 1000, 6);
+                const result = service.simulateEarlyRedemption(highFeeBond, 1000, 6);
 
                 // No interest at month 6 for OTS
                 // Fee = 5 * 1000 / 100 = 50 PLN
@@ -724,8 +734,8 @@ describe('BondCalculator', () => {
                 const lowFeeBond: Bond = Constants.BONDS.find((b) => b.type === BondType.ROR)!;
                 const highFeeBond: Bond = Constants.BONDS.find((b) => b.type === BondType.EDO)!;
 
-                const lowFeeResult = BondCalculator.simulateEarlyRedemption(lowFeeBond, 10000, 6);
-                const highFeeResult = BondCalculator.simulateEarlyRedemption(highFeeBond, 10000, 6);
+                const lowFeeResult = service.simulateEarlyRedemption(lowFeeBond, 10000, 6);
+                const highFeeResult = service.simulateEarlyRedemption(highFeeBond, 10000, 6);
 
                 // EDO should have higher fee
                 expect(highFeeResult.earlyRedemptionFee).toBeGreaterThan(lowFeeResult.earlyRedemptionFee);
@@ -737,7 +747,7 @@ describe('BondCalculator', () => {
                 Constants.BONDS.forEach((bond) => {
                     if (bond.durationMonths > 1) {
                         const midMonth = Math.floor(bond.durationMonths / 2);
-                        const result = BondCalculator.simulateEarlyRedemption(bond, 1000, midMonth, 5.0);
+                        const result = service.simulateEarlyRedemption(bond, 1000, midMonth, 5.0);
 
                         expect(result.redemptionMonth).toBe(midMonth);
                         expect(result.valueAtRedemption).toBeGreaterThanOrEqual(1000);
@@ -756,7 +766,7 @@ describe('BondCalculator', () => {
                 const edoBond = Constants.BONDS.find(b => b.type === BondType.EDO)!;
                 // EDO margin is 2%, so -1% inflation + 2% margin = 1% interest
                 const deflationRate = -1.0;
-                const result = BondCalculator.simulate(edoBond, 1000, deflationRate);
+                const result = service.simulate(edoBond, 1000, deflationRate);
 
                 // Year 1 is fixed 5.6% regardless of inflation
                 expect(result.values[12]).toBeCloseTo(1056, 2);
@@ -768,7 +778,7 @@ describe('BondCalculator', () => {
             it('should handle high inflation', () => {
                 const coiBond = Constants.BONDS.find(b => b.type === BondType.COI)!;
                 const hyperInflation = 20.0;
-                const result = BondCalculator.simulate(coiBond, 1000, hyperInflation);
+                const result = service.simulate(coiBond, 1000, hyperInflation);
 
                 // Year 2 rate = 20% + 1.5% = 21.5%
                 // Interest = 1000 * 0.215 = 215
@@ -788,7 +798,7 @@ describe('BondCalculator', () => {
                 // simulateEarlyRedemption uses simulate().values[12].
                 // So it assumes you redeem AFTER capitalization.
 
-                const result = BondCalculator.simulateEarlyRedemption(edoBond, 1000, 12);
+                const result = service.simulateEarlyRedemption(edoBond, 1000, 12);
 
                 // Value should be 1056 (capitalized)
                 expect(result.valueAtRedemption).toBeCloseTo(1056, 2);
@@ -798,7 +808,7 @@ describe('BondCalculator', () => {
             });
 
             it('should handle redemption one month before capitalization (Month 11)', () => {
-                const result = BondCalculator.simulateEarlyRedemption(edoBond, 1000, 11);
+                const result = service.simulateEarlyRedemption(edoBond, 1000, 11);
 
                 // Month 11 value is still 1000 (no cap yet).
                 expect(result.valueAtRedemption).toBe(1000);

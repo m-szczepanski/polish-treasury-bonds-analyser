@@ -11,14 +11,16 @@
 
             <div class="form-group">
                 <label>Częstotliwość (miesiące)</label>
-                <input type="number" [(ngModel)]="frequencyMonths" (ngModelChange)="calculate()" min="1" max="12">
+                <input type="number" [ngModel]="frequencyMonths()" (ngModelChange)="updateKwargs('freq', $event)"
+                    min="1" max="12">
                 <span class="hint">Co ile miesięcy dokupować obligacje</span>
             </div>
 
             <div class="form-group">
                 <label>Czas trwania</label>
-                <input type="range" [(ngModel)]="durationMonths" (ngModelChange)="calculate()" min="1" max="120"
-                    step="1" list="strategy-markers">
+                <label>Czas trwania</label>
+                <input type="range" [ngModel]="durationMonths()" (ngModelChange)="updateKwargs('dur', $event)" min="1"
+                    max="120" step="1" list="strategy-markers">
                 <datalist id="strategy-markers">
                     <option value="12" label="1 rok"></option>
                     <option value="24" label="2 lata"></option>
@@ -31,20 +33,20 @@
                     <option value="108" label="9 lat"></option>
                     <option value="120" label="10 lat"></option>
                 </datalist>
-                <span class="value-label">{{ durationMonths }} mies.</span>
+                <span class="value-label">{{ durationMonths() }} mies.</span>
             </div>
 
             <div class="form-group">
                 <label>Inflacja (%)</label>
-                <input type="number" [(ngModel)]="inflationRate" (ngModelChange)="calculate()" min="0" max="20"
-                    step="0.1">
+                <input type="number" [ngModel]="inflationRate()" (ngModelChange)="updateKwargs('infl', $event)" min="0"
+                    max="20" step="0.1">
                 <span class="hint">Dla obligacji indeksowanych (COI, EDO)</span>
             </div>
 
             <div class="form-group bond-selection">
                 <label>Obligacje i Kwoty</label>
                 <div class="radio-list">
-                    <div *ngFor="let config of configurations" class="config-item">
+                    <div *ngFor="let config of configurations()" class="config-item">
                         <div class="config-header" (click)="toggleBond(config)">
                             <div class="radio-circle checkbox-style">
                                 <div class="radio-inner" *ngIf="config.isSelected"></div>
@@ -60,19 +62,22 @@
                             <div class="input-row">
                                 <div class="input-wrapper">
                                     <label>Start (zł)</label>
-                                    <input type="number" [(ngModel)]="config.initialAmount"
-                                        (ngModelChange)="calculate()" min="0" step="100">
+                                    <input type="number" [ngModel]="config.initialAmount"
+                                        (ngModelChange)="updateConfigValue(config, 'initialAmount', $event)" min="0"
+                                        step="100">
                                 </div>
                                 <div class="input-wrapper">
                                     <label>Cyklicznie (zł)</label>
-                                    <input type="number" [(ngModel)]="config.recurringAmount"
-                                        (ngModelChange)="calculate()" min="0" step="100">
+                                    <input type="number" [ngModel]="config.recurringAmount"
+                                        (ngModelChange)="updateConfigValue(config, 'recurringAmount', $event)" min="0"
+                                        step="100">
                                 </div>
                             </div>
                             <div class="input-row">
                                 <div class="checkbox-wrapper">
                                     <input type="checkbox" [id]="'reinvest-' + config.bond.type"
-                                        [(ngModel)]="config.reinvest" (ngModelChange)="calculate()">
+                                        [ngModel]="config.reinvest"
+                                        (ngModelChange)="updateConfigValue(config, 'reinvest', $event)">
                                     <label [for]="'reinvest-' + config.bond.type">Reinwestuj zysk po zakończeniu
                                         obligacji</label>
                                 </div>
@@ -87,7 +92,7 @@
         <div class="visualization-panel">
 
             <!-- Summary Stats -->
-            <div class="summary-cards" *ngIf="result">
+            <div class="summary-cards" *ngIf="simulation()">
                 <div class="summary-card">
                     <span class="label">Wpłacono łącznie</span>
                     <span class="value">{{ totalInvestedSum | number:'1.2-2' }} zł</span>
@@ -107,18 +112,17 @@
             </div>
 
             <!-- Summary Chart -->
-            <div class="chart-container" *ngIf="summaryChart">
-                <h3>{{ summaryChart.title }}</h3>
+            <div class="chart-container" *ngIf="summaryChart(); let chart">
+                <h3>{{ chart.title }}</h3>
                 <div class="canvas-wrapper">
-                    <canvas baseChart [data]="summaryChart.data" [options]="summaryChart.options"
-                        [type]="lineChartType">
+                    <canvas baseChart [data]="chart.data" [options]="chart.options" [type]="lineChartType">
                     </canvas>
                 </div>
             </div>
 
             <!-- Individual Charts Grid -->
-            <div class="charts-grid" *ngIf="individualCharts.length > 0">
-                <div class="chart-container small" *ngFor="let chart of individualCharts">
+            <div class="charts-grid" *ngIf="individualCharts().length > 0">
+                <div class="chart-container small" *ngFor="let chart of individualCharts()">
                     <h3>{{ chart.title }}</h3>
                     <div class="canvas-wrapper">
                         <canvas baseChart [data]="chart.data" [options]="chart.options" [type]="lineChartType">
