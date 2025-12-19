@@ -329,3 +329,15 @@
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+.strategy-content.centered {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.strategy-content.centered .controls-panel {
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
