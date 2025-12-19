@@ -58,6 +58,7 @@ if (isMainModule(import.meta.url) || process.env['pm_id']) {
   });
 
   server.on('error', (error) => {
+    console.error('Express server error:', error);
     throw error;
   });
 }

@@ -9,6 +9,7 @@ export const routes: Routes = [
         data: {
             title: 'Kalkulator Zysków',
             description: 'Oblicz zysk z polskich obligacji skarbowych (OTS, DOS, TOZ, COI, EDO). Sprawdź opłacalność inwestycji.',
+            keywords: 'kalkulator obligacji, OTS, DOS, TOZ, COI, EDO, obligacje skarbowe 2025, oszczędzanie'
         },
     },
     {
@@ -17,6 +18,7 @@ export const routes: Routes = [
         data: {
             title: 'Strategia Inwestycyjna',
             description: 'Symulacja długoterminowych strategii inwestowania w obligacje skarbowe (drabina obligacji).',
+            keywords: 'strategia inwestycyjna, drabina obligacji, rentier, pasywny dochód, obligacje skarbowe'
         },
     },
     {
@@ -28,6 +30,7 @@ export const routes: Routes = [
         data: {
             title: 'Analiza Portfela',
             description: 'Szczegółowa analiza Twojego portfela obligacji skarbowych. Wgraj plik z historią operacji.',
+            keywords: 'analiza portfela, historia operacji PKO, obligacje analiza, portfel inwestycyjny'
         },
     },
     { path: '**', redirectTo: '' },

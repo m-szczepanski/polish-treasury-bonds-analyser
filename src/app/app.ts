@@ -36,7 +36,8 @@ export class AppComponent implements OnInit {
         const title = data['title'] || 'Kalkulator Obligacji';
         const description =
           data['description'] || 'Analizuj zyski z polskich obligacji skarbowych.';
-        this.seoService.setPageData(title, description);
+        const keywords = data['keywords'];
+        this.seoService.setPageData(title, description, keywords);
       });
   }
 }
