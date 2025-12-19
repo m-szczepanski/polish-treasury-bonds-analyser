@@ -1,9 +1,10 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { TopMenuComponent } from './components/top-menu/top-menu';
 import { SeoService } from './services/seo.service';
 import { filter, map, mergeMap } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-root',
@@ -16,6 +17,7 @@ export class AppComponent implements OnInit {
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
   private seoService = inject(SeoService);
+  private destroyRef = inject(DestroyRef);
   title = 'polish-treasury-bonds-analyser';
 
   ngOnInit() {
@@ -28,6 +30,7 @@ export class AppComponent implements OnInit {
           return route;
         }),
         mergeMap((route) => route.data),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((data) => {
         const title = data['title'] || 'Kalkulator Obligacji';
