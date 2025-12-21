@@ -26,6 +26,7 @@
     transition: color 0.2s ease;
     font-size: 0.95rem;
     position: relative;
+    white-space: nowrap;
 }
 
 .menu-item:hover {
@@ -59,4 +60,36 @@
 .icon {
     font-size: 0.8em;
     margin-left: 6px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .top-menu {
+        padding: 0 16px;
+    }
+
+    .menu-items {
+        gap: 24px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        /* Firefox */
+        -ms-overflow-style: none;
+        /* IE/Edge */
+    }
+
+    .menu-items::-webkit-scrollbar {
+        display: none;
+        /* Chrome/Safari */
+    }
+
+    .menu-item {
+        font-size: 0.9rem;
+    }
+
+    .menu-item.external {
+        margin-left: 0;
+        /* Keep it in the flow for scrolling */
+    }
 }
