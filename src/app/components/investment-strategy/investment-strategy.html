@@ -12,7 +12,7 @@
             <div class="form-group">
                 <label>Częstotliwość (miesiące)</label>
                 <input type="number" [ngModel]="frequencyMonths()" (ngModelChange)="updateParameter('freq', $event)"
-                    min="1" max="12">
+                    [ngModelOptions]="{updateOn: 'blur'}" min="1" max="12">
                 <span class="hint">Co ile miesięcy dokupować obligacje</span>
             </div>
 
@@ -39,7 +39,7 @@
             <div class="form-group">
                 <label>Inflacja (%)</label>
                 <input type="number" [ngModel]="inflationRate()" (ngModelChange)="updateParameter('infl', $event)"
-                    min="0" max="20" step="0.1">
+                    [ngModelOptions]="{updateOn: 'blur'}" min="0" max="20" step="0.1">
                 <span class="hint">Dla obligacji indeksowanych (COI, EDO)</span>
             </div>
 
@@ -63,14 +63,14 @@
                                 <div class="input-wrapper">
                                     <label>Start (zł)</label>
                                     <input type="number" [ngModel]="config.initialAmount"
-                                        (ngModelChange)="updateConfigValue(config, 'initialAmount', $event)" min="0"
-                                        step="100">
+                                        (ngModelChange)="updateConfigValue(config, 'initialAmount', $event)"
+                                        [ngModelOptions]="{updateOn: 'blur'}" min="0" step="100">
                                 </div>
                                 <div class="input-wrapper">
                                     <label>Cyklicznie (zł)</label>
                                     <input type="number" [ngModel]="config.recurringAmount"
-                                        (ngModelChange)="updateConfigValue(config, 'recurringAmount', $event)" min="0"
-                                        step="100">
+                                        (ngModelChange)="updateConfigValue(config, 'recurringAmount', $event)"
+                                        [ngModelOptions]="{updateOn: 'blur'}" min="0" step="100">
                                 </div>
                             </div>
                             <div class="input-row">
@@ -80,6 +80,14 @@
                                         (ngModelChange)="updateConfigValue(config, 'reinvest', $event)">
                                     <label [for]="'reinvest-' + config.bond.type">Reinwestuj zysk po zakończeniu
                                         obligacji</label>
+                                    <div class="tooltip-wrapper" tabindex="0">
+                                        <span class="tooltip-icon" role="img"
+                                            aria-label="Informacja o reinwestycji">?</span>
+                                        <div class="tooltip-text" role="tooltip">
+                                            Zysk z zakończonych obligacji zostanie automatycznie przeznaczony na zakup
+                                            nowych obligacji tego samego typu.
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -111,6 +119,8 @@
                 </div>
             </div>
 
+            <!-- Charts -->
+            @if (isBrowser) {
             <!-- Summary Chart -->
             <div class="chart-container" *ngIf="summaryChart(); let chart">
                 <h3>{{ chart.title }}</h3>
@@ -130,6 +140,7 @@
                     </div>
                 </div>
             </div>
+            }
         </div>
     </div>
 </main>

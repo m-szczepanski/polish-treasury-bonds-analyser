@@ -237,6 +237,79 @@
     font-weight: 500;
 }
 
+.tooltip-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin-left: 4px;
+}
+
+.tooltip-icon {
+    width: 16px;
+    height: 16px;
+    background: #f0f0f0;
+    color: #666;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: help;
+    transition: all 0.2s;
+    border: 1px solid #e0e0e0;
+}
+
+.tooltip-wrapper:hover .tooltip-icon,
+.tooltip-wrapper:focus-within .tooltip-icon {
+    background: #000;
+    color: #fff;
+    border-color: #000;
+}
+
+.tooltip-text {
+    visibility: hidden;
+    width: 200px;
+    background-color: #1a1a1a;
+    color: #fff;
+    text-align: left;
+    border-radius: 6px;
+    padding: 10px 12px;
+    position: absolute;
+    z-index: 1000;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0.3s;
+    font-size: 11px;
+    line-height: 1.4;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    font-weight: 400;
+    letter-spacing: 0.2px;
+}
+
+.tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #1a1a1a transparent transparent transparent;
+}
+
+.tooltip-wrapper:hover .tooltip-text,
+.tooltip-wrapper:focus-within .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+.tooltip-wrapper:focus {
+    outline: none;
+}
+
 .visualization-panel {
     display: flex;
     flex-direction: column;

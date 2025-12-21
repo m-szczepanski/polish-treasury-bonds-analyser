@@ -20,7 +20,7 @@
             <div class="form-group">
                 <label>Kwota (PLN)</label>
                 <input type="number" [ngModel]="item.amount" (ngModelChange)="updateBondAmount($index, $event)"
-                    step="100" min="100" class="form-control">
+                    [ngModelOptions]="{updateOn: 'blur'}" step="100" min="100" class="form-control">
             </div>
             <button class="remove-btn" (click)="removeBond($index)" [disabled]="portfolio().length <= 1"
                 title="Usuń pozycję">
@@ -82,6 +82,7 @@
         <br>
 
         <div class="charts-grid">
+            @if (isBrowser) {
             <div class="chart-card">
                 <h3 class="section-title">Struktura Portfela</h3>
                 <div class="chart-container">
@@ -97,6 +98,7 @@
                     </canvas>
                 </div>
             </div>
+            }
         </div>
     </div>
 </div>

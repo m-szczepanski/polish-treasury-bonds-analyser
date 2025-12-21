@@ -1,4 +1,7 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { debounceTime } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
@@ -30,6 +33,8 @@ interface PortfolioSummary {
 export class PortfolioAnalysisComponent {
     private bondCalculator = inject(BondCalculatorService);
     private chartConfig = inject(ChartConfigService);
+    private platformId = inject(PLATFORM_ID);
+    isBrowser = isPlatformBrowser(this.platformId);
 
     availableBonds = Constants.BONDS;
 
@@ -84,6 +89,13 @@ export class PortfolioAnalysisComponent {
         };
     });
 
+    debouncedResult = toSignal(
+        toObservable(this.calculationResult).pipe(
+            debounceTime(this.isBrowser ? Constants.CHART_DEBOUNCE_MS : 0)
+        ),
+        { initialValue: this.calculationResult() }
+    );
+
     summary = computed(() => this.calculationResult().summary);
 
     optimizationTip = computed(() => {
@@ -112,7 +124,9 @@ export class PortfolioAnalysisComponent {
     profitChartType: ChartType = 'line';
 
     pieChartData = computed<ChartData<'pie', number[], string | string[]>>(() => {
-        const map = this.calculationResult().compositionMap;
+        const res = this.debouncedResult();
+        if (!res) return { labels: [], datasets: [] };
+        const map = res.compositionMap;
         const colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b'];
 
         return {
@@ -125,6 +139,9 @@ export class PortfolioAnalysisComponent {
     });
 
     profitChartData = computed<ChartData<'line'>>(() => {
+        const res = this.debouncedResult();
+        if (!res) return { labels: [], datasets: [] };
+
         const horizon = this.investmentHorizon();
         const items = this.portfolio();
         const months = Array.from({ length: horizon + 1 }, (_, i) => i);
@@ -190,7 +207,7 @@ export class PortfolioAnalysisComponent {
     updateBondAmount(index: number, amount: number) {
         this.portfolio.update(curr => {
             const copy = [...curr];
-            copy[index] = { ...copy[index], amount };
+            copy[index] = { ...copy[index], amount: Number(amount) };
             return copy;
         });
     }

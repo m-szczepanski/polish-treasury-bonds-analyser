@@ -20,6 +20,7 @@ export interface Bond {
 
 export class Constants {
   static readonly TAX_RATE = 0.19; // Belka tax
+  static readonly CHART_DEBOUNCE_MS = 500;
 
   static readonly BONDS: Bond[] = [
     {

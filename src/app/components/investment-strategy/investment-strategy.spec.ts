@@ -1,8 +1,10 @@
+import 'zone.js/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { InvestmentStrategyComponent } from './investment-strategy';
 import { Component, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Constants } from '../../logic/constants';
 
 @Component({
     selector: 'canvas[baseChart]',
@@ -65,6 +67,7 @@ describe('InvestmentStrategyComponent', () => {
         component.toggleBond(configs[1]);
 
         fixture.detectChanges();
+        await new Promise(resolve => setTimeout(resolve, Constants.CHART_DEBOUNCE_MS + 100));
 
         expect(component.individualCharts().length).toBe(2);
         expect(component.simulation()?.totalInvested.length).toBeGreaterThan(0);
@@ -75,6 +78,7 @@ describe('InvestmentStrategyComponent', () => {
         component.toggleBond(config);
 
         fixture.detectChanges();
+        await new Promise(resolve => setTimeout(resolve, Constants.CHART_DEBOUNCE_MS + 100));
 
         expect(component.summaryChart()).toBeDefined();
     });
