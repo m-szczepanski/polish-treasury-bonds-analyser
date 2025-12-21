@@ -1,7 +1,7 @@
 import 'zone.js/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BondCardComponent } from './bond-card';
-import { Bond, BondType } from '../../logic/constants';
+import { Bond, BondType, Constants } from '../../logic/constants';
 import { BondCalculatorService } from '../../logic/bond-calculator';
 import { ChartConfigService } from '../../logic/chart-config.service';
 
@@ -59,7 +59,7 @@ describe('BondCardComponent', () => {
   it('should update chart data when calculation runs', async () => {
     fixture.componentRef.setInput('investmentAmount', 2000);
     fixture.detectChanges();
-    await new Promise(resolve => setTimeout(resolve, 600));
+    await new Promise(resolve => setTimeout(resolve, Constants.CHART_DEBOUNCE_MS + 100));
 
     expect(component.lineChartData().labels?.length).toBeGreaterThan(0);
     expect(component.lineChartData().datasets[0].data.length).toBeGreaterThan(0);

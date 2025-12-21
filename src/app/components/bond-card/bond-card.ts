@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartDataset, ChartType } from 'chart.js';
-import { Bond } from '../../logic/constants';
+import { Bond, Constants } from '../../logic/constants';
 import { BondCalculatorService, SimulationResult } from '../../logic/bond-calculator';
 import { ChartConfigService } from '../../logic/chart-config.service';
 
@@ -36,10 +36,11 @@ export class BondCardComponent {
     return this.bondCalculator.simulate(bond, amount, inflation);
   });
 
-  debouncedResult = toSignal<SimulationResult | null>(
+  debouncedResult = toSignal(
     toObservable(this.simulationResult).pipe(
-      debounceTime(this.isBrowser ? 500 : 0)
-    ), { initialValue: null as any });
+      debounceTime(this.isBrowser ? Constants.CHART_DEBOUNCE_MS : 0)
+    ), { initialValue: null as SimulationResult | null }
+  );
 
   public lineChartData = computed<ChartData<'line'>>(() => {
     const result = this.debouncedResult();
@@ -60,7 +61,6 @@ export class BondCardComponent {
 
   public lineChartOptions: ChartConfiguration['options'] = this.chartConfig.defaultBaseChartOptions;
   public lineChartType: ChartType = 'line';
-  constructor() { }
 
   get profitColor(): string {
     return (this.simulationResult()?.netProfit ?? 0) > 0 ? '#2e7d32' : '#d32f2f';

@@ -260,7 +260,8 @@
     border: 1px solid #e0e0e0;
 }
 
-.tooltip-wrapper:hover .tooltip-icon {
+.tooltip-wrapper:hover .tooltip-icon,
+.tooltip-wrapper:focus-within .tooltip-icon {
     background: #000;
     color: #fff;
     border-color: #000;
@@ -299,9 +300,14 @@
     border-color: #1a1a1a transparent transparent transparent;
 }
 
-.tooltip-wrapper:hover .tooltip-text {
+.tooltip-wrapper:hover .tooltip-text,
+.tooltip-wrapper:focus-within .tooltip-text {
     visibility: visible;
     opacity: 1;
+}
+
+.tooltip-wrapper:focus {
+    outline: none;
 }
 
 .visualization-panel {

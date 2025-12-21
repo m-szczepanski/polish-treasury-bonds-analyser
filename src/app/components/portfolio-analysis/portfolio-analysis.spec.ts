@@ -2,7 +2,7 @@ import 'zone.js/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PortfolioAnalysisComponent } from './portfolio-analysis';
 import { RouterTestingModule } from '@angular/router/testing';
-import { BondType } from '../../logic/constants';
+import { BondType, Constants } from '../../logic/constants';
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -73,7 +73,7 @@ describe('PortfolioAnalysisComponent', () => {
 
     it('should generate charts data', async () => {
         fixture.detectChanges();
-        await new Promise(resolve => setTimeout(resolve, 600));
+        await new Promise(resolve => setTimeout(resolve, Constants.CHART_DEBOUNCE_MS + 100));
         const pieData = component.pieChartData();
         const profitData = component.profitChartData();
 

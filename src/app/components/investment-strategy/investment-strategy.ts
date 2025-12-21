@@ -55,7 +55,7 @@ export class InvestmentStrategyComponent {
 
     debouncedSimulation = toSignal(
         toObservable(this.simulation).pipe(
-            debounceTime(this.isBrowser ? 500 : 0)
+            debounceTime(this.isBrowser ? Constants.CHART_DEBOUNCE_MS : 0)
         ),
         { initialValue: this.simulation() }
     );

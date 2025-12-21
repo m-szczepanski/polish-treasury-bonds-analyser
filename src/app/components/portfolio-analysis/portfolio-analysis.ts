@@ -91,7 +91,7 @@ export class PortfolioAnalysisComponent {
 
     debouncedResult = toSignal(
         toObservable(this.calculationResult).pipe(
-            debounceTime(this.isBrowser ? 500 : 0)
+            debounceTime(this.isBrowser ? Constants.CHART_DEBOUNCE_MS : 0)
         ),
         { initialValue: this.calculationResult() }
     );
