@@ -80,6 +80,13 @@
                                         (ngModelChange)="updateConfigValue(config, 'reinvest', $event)">
                                     <label [for]="'reinvest-' + config.bond.type">Reinwestuj zysk po zakończeniu
                                         obligacji</label>
+                                    <div class="tooltip-wrapper">
+                                        <span class="tooltip-icon">?</span>
+                                        <div class="tooltip-text">
+                                            Zysk z zakończonych obligacji zostanie automatycznie przeznaczony na zakup
+                                            nowych obligacji tego samego typu.
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
