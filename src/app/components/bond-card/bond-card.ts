@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, ChangeDetectionStrategy, signal, PLATFORM_ID } from '@angular/core';
+import { Component, computed, inject, input, ChangeDetectionStrategy, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime } from 'rxjs';
@@ -36,11 +36,10 @@ export class BondCardComponent {
     return this.bondCalculator.simulate(bond, amount, inflation);
   });
 
-  debouncedResult = toSignal(
+  debouncedResult = toSignal<SimulationResult | null>(
     toObservable(this.simulationResult).pipe(
       debounceTime(this.isBrowser ? 500 : 0)
-    )
-  );
+    ), { initialValue: null as any });
 
   public lineChartData = computed<ChartData<'line'>>(() => {
     const result = this.debouncedResult();
@@ -61,10 +60,7 @@ export class BondCardComponent {
 
   public lineChartOptions: ChartConfiguration['options'] = this.chartConfig.defaultBaseChartOptions;
   public lineChartType: ChartType = 'line';
-
   constructor() { }
-
-
 
   get profitColor(): string {
     return (this.simulationResult()?.netProfit ?? 0) > 0 ? '#2e7d32' : '#d32f2f';

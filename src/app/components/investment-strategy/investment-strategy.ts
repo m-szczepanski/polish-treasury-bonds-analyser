@@ -56,7 +56,8 @@ export class InvestmentStrategyComponent {
     debouncedSimulation = toSignal(
         toObservable(this.simulation).pipe(
             debounceTime(this.isBrowser ? 500 : 0)
-        )
+        ),
+        { initialValue: this.simulation() }
     );
 
     summaryChart = computed(() => {
@@ -89,7 +90,7 @@ export class InvestmentStrategyComponent {
                 this.frequencyMonths.set(Number(value));
                 break;
             case 'dur':
-                this.durationMonths.set(value);
+                this.durationMonths.set(Number(value));
                 break;
             case 'infl':
                 this.inflationRate.set(Number(value));
@@ -113,9 +114,11 @@ export class InvestmentStrategyComponent {
         if (index > -1) {
             const updated = [...current];
 
-            let finalValue = value;
+            let finalValue: BondStrategyConfig[K];
             if (field === 'initialAmount' || field === 'recurringAmount') {
-                finalValue = Number(value) as any;
+                finalValue = Number(value) as BondStrategyConfig[K];
+            } else {
+                finalValue = value;
             }
 
             updated[index] = { ...config, [field]: finalValue };

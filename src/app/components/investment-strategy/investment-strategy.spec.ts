@@ -1,5 +1,5 @@
 import 'zone.js/testing';
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { InvestmentStrategyComponent } from './investment-strategy';
 import { Component, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';

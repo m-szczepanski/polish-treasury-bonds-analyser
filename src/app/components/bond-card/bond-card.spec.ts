@@ -1,5 +1,5 @@
 import 'zone.js/testing';
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BondCardComponent } from './bond-card';
 import { Bond, BondType } from '../../logic/constants';
 import { BondCalculatorService } from '../../logic/bond-calculator';
