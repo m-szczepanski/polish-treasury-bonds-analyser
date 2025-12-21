@@ -190,7 +190,7 @@ export class PortfolioAnalysisComponent {
     updateBondAmount(index: number, amount: number) {
         this.portfolio.update(curr => {
             const copy = [...curr];
-            copy[index] = { ...copy[index], amount };
+            copy[index] = { ...copy[index], amount: Number(amount) };
             return copy;
         });
     }

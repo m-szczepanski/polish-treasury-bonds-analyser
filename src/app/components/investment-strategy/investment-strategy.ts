@@ -75,13 +75,13 @@ export class InvestmentStrategyComponent {
     updateParameter(key: 'freq' | 'dur' | 'infl', value: number) {
         switch (key) {
             case 'freq':
-                this.frequencyMonths.set(value);
+                this.frequencyMonths.set(Number(value));
                 break;
             case 'dur':
                 this.durationMonths.set(value);
                 break;
             case 'infl':
-                this.inflationRate.set(value);
+                this.inflationRate.set(Number(value));
                 break;
         }
     }
@@ -101,7 +101,13 @@ export class InvestmentStrategyComponent {
         const index = current.indexOf(config);
         if (index > -1) {
             const updated = [...current];
-            updated[index] = { ...config, [field]: value };
+
+            let finalValue = value;
+            if (field === 'initialAmount' || field === 'recurringAmount') {
+                finalValue = Number(value) as any;
+            }
+
+            updated[index] = { ...config, [field]: finalValue };
             this.configurations.set(updated);
         }
     }

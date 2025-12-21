@@ -20,7 +20,7 @@
             <div class="form-group">
                 <label>Kwota (PLN)</label>
                 <input type="number" [ngModel]="item.amount" (ngModelChange)="updateBondAmount($index, $event)"
-                    step="100" min="100" class="form-control">
+                    [ngModelOptions]="{updateOn: 'blur'}" step="100" min="100" class="form-control">
             </div>
             <button class="remove-btn" (click)="removeBond($index)" [disabled]="portfolio().length <= 1"
                 title="Usuń pozycję">
