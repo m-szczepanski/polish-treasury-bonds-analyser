@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import 'zone.js/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { InvestmentStrategyComponent } from './investment-strategy';
 import { Component, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -65,6 +66,7 @@ describe('InvestmentStrategyComponent', () => {
         component.toggleBond(configs[1]);
 
         fixture.detectChanges();
+        await new Promise(resolve => setTimeout(resolve, 600));
 
         expect(component.individualCharts().length).toBe(2);
         expect(component.simulation()?.totalInvested.length).toBeGreaterThan(0);
@@ -75,6 +77,7 @@ describe('InvestmentStrategyComponent', () => {
         component.toggleBond(config);
 
         fixture.detectChanges();
+        await new Promise(resolve => setTimeout(resolve, 600));
 
         expect(component.summaryChart()).toBeDefined();
     });

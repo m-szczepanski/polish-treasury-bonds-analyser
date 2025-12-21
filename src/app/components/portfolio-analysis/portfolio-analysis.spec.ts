@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import 'zone.js/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { PortfolioAnalysisComponent } from './portfolio-analysis';
 import { RouterTestingModule } from '@angular/router/testing';
 import { BondType } from '../../logic/constants';
@@ -70,8 +71,9 @@ describe('PortfolioAnalysisComponent', () => {
         expect(summary.totalInvestment).toBe(3000);
     });
 
-    it('should generate charts data', () => {
+    it('should generate charts data', async () => {
         fixture.detectChanges();
+        await new Promise(resolve => setTimeout(resolve, 600));
         const pieData = component.pieChartData();
         const profitData = component.profitChartData();
 

@@ -111,6 +111,8 @@
                 </div>
             </div>
 
+            <!-- Charts -->
+            @if (isBrowser) {
             <!-- Summary Chart -->
             <div class="chart-container" *ngIf="summaryChart(); let chart">
                 <h3>{{ chart.title }}</h3>
@@ -130,6 +132,7 @@
                     </div>
                 </div>
             </div>
+            }
         </div>
     </div>
 </main>

@@ -82,6 +82,7 @@
         <br>
 
         <div class="charts-grid">
+            @if (isBrowser) {
             <div class="chart-card">
                 <h3 class="section-title">Struktura Portfela</h3>
                 <div class="chart-container">
@@ -97,6 +98,7 @@
                     </canvas>
                 </div>
             </div>
+            }
         </div>
     </div>
 </div>

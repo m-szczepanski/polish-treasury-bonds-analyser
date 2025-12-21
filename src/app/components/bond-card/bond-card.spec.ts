@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import 'zone.js/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { BondCardComponent } from './bond-card';
 import { Bond, BondType } from '../../logic/constants';
 import { BondCalculatorService } from '../../logic/bond-calculator';
@@ -55,12 +56,13 @@ describe('BondCardComponent', () => {
     expect(component.simulationResult()?.values[0]).toBe(5000);
   });
 
-  it('should update chart data when calculation runs', () => {
+  it('should update chart data when calculation runs', async () => {
     fixture.componentRef.setInput('investmentAmount', 2000);
     fixture.detectChanges();
+    await new Promise(resolve => setTimeout(resolve, 600));
 
-    expect(component.lineChartData.labels?.length).toBeGreaterThan(0);
-    expect(component.lineChartData.datasets[0].data.length).toBeGreaterThan(0);
+    expect(component.lineChartData().labels?.length).toBeGreaterThan(0);
+    expect(component.lineChartData().datasets[0].data.length).toBeGreaterThan(0);
   });
 
   it('should return correct profit color', () => {

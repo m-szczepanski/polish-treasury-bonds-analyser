@@ -1,4 +1,7 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { debounceTime } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Bond, Constants } from '../../logic/constants';
@@ -32,6 +35,8 @@ export interface ChartSet {
 export class InvestmentStrategyComponent {
     private strategyCalculator = inject(StrategyCalculatorService);
     private chartConfig = inject(ChartConfigService);
+    private platformId = inject(PLATFORM_ID);
+    isBrowser = isPlatformBrowser(this.platformId);
 
     frequencyMonths = signal(1);
     durationMonths = signal(12);
@@ -48,14 +53,20 @@ export class InvestmentStrategyComponent {
         return this.performCalculation(freq, dur, infl, configs);
     });
 
+    debouncedSimulation = toSignal(
+        toObservable(this.simulation).pipe(
+            debounceTime(this.isBrowser ? 500 : 0)
+        )
+    );
+
     summaryChart = computed(() => {
-        const res = this.simulation();
+        const res = this.debouncedSimulation();
         if (!res) return null;
         return this.createSummaryChart(res);
     });
 
     individualCharts = computed(() => {
-        const res = this.simulation();
+        const res = this.debouncedSimulation();
         if (!res || res.simulations.length <= 1) return [];
         return res.simulations.map(s => this.createIndividualChart(s.config, s.result));
     });
@@ -177,7 +188,7 @@ export class InvestmentStrategyComponent {
             data: {
                 datasets: [dsValue, dsInvested],
                 labels
-            },
+            } as ChartConfiguration<'line'>['data'],
             options: this.chartConfig.defaultBaseChartOptions
         };
     }
@@ -189,7 +200,10 @@ export class InvestmentStrategyComponent {
 
         return {
             title: config.bond.name,
-            data: { datasets: [dsValue, dsInvested], labels },
+            data: {
+                datasets: [dsValue, dsInvested],
+                labels
+            } as ChartConfiguration<'line'>['data'],
             options: this.chartConfig.defaultBaseChartOptions
         };
     }

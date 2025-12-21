@@ -1,4 +1,7 @@
-import { Component, computed, effect, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, input, ChangeDetectionStrategy, signal, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { debounceTime } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
@@ -18,6 +21,8 @@ import { ChartConfigService } from '../../logic/chart-config.service';
 export class BondCardComponent {
   private bondCalculator = inject(BondCalculatorService);
   private chartConfig = inject(ChartConfigService);
+  private platformId = inject(PLATFORM_ID);
+  isBrowser = isPlatformBrowser(this.platformId);
 
   bond = input.required<Bond>();
   investmentAmount = input<number>(1000);
@@ -31,37 +36,35 @@ export class BondCardComponent {
     return this.bondCalculator.simulate(bond, amount, inflation);
   });
 
-  public lineChartData: ChartData<'line'> = {
-    labels: [],
-    datasets: []
-  };
+  debouncedResult = toSignal(
+    toObservable(this.simulationResult).pipe(
+      debounceTime(this.isBrowser ? 500 : 0)
+    )
+  );
 
-  public lineChartOptions: ChartConfiguration['options'] = this.chartConfig.defaultBaseChartOptions;
-  public lineChartType: ChartType = 'line';
+  public lineChartData = computed<ChartData<'line'>>(() => {
+    const result = this.debouncedResult();
+    if (!result) return { labels: [], datasets: [] };
 
-  constructor() {
-    effect(() => {
-      const result = this.simulationResult();
-      if (result) {
-        this.updateChart(result);
-      }
-    });
-  }
-
-  private updateChart(result: SimulationResult): void {
     const labels = result.months.map((m) => `M${m}`);
-
     const dataset = this.chartConfig.getDataset(
       'Wartość inwestycji (PLN)',
       result.values,
       true
     ) as unknown as ChartDataset<'line', number[]>;
 
-    this.lineChartData = {
+    return {
       labels,
       datasets: [dataset],
     };
-  }
+  });
+
+  public lineChartOptions: ChartConfiguration['options'] = this.chartConfig.defaultBaseChartOptions;
+  public lineChartType: ChartType = 'line';
+
+  constructor() { }
+
+
 
   get profitColor(): string {
     return (this.simulationResult()?.netProfit ?? 0) > 0 ? '#2e7d32' : '#d32f2f';
