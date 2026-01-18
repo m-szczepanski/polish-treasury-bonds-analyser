@@ -32,8 +32,7 @@ export class BondCardComponent {
     const amount = this.investmentAmount();
     if (!bond) return null;
 
-    const inflation = 5.0;
-    return this.bondCalculator.simulate(bond, amount, inflation);
+    return this.bondCalculator.simulate(bond, amount, Constants.INFLATION_RATE);
   });
 
   debouncedResult = toSignal(

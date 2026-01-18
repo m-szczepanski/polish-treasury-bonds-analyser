@@ -18,7 +18,7 @@ export class BondCalculatorService {
    * @param amount Initial investment amount
    * @param inflationRate Assumed constant inflation rate for indexed bonds (after 1st year)
    */
-  simulate(bond: Bond, amount: number, inflationRate = 0): SimulationResult {
+  simulate(bond: Bond, amount: number, inflationRate = Constants.INFLATION_RATE): SimulationResult {
     const months: number[] = [];
     const values: number[] = [];
     let currentCapital = amount;
@@ -101,7 +101,7 @@ export class BondCalculatorService {
     bond: Bond,
     amount: number,
     redemptionMonth: number,
-    inflationRate = 0
+    inflationRate = Constants.INFLATION_RATE
   ): EarlyRedemptionResult {
     if (redemptionMonth <= 0 || redemptionMonth >= bond.durationMonths) {
       throw new Error(
