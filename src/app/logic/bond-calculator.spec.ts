@@ -667,7 +667,6 @@ describe('BondCalculatorService', () => {
         const coiBond = Constants.BONDS.find(b => b.type === BondType.COI)!;
 
         it('should use Constants.INFLATION_RATE when no inflation argument is provided', () => {
-
             const result = service.simulate(coiBond, 1000);
 
             expect(result.values[12]).toBeCloseTo(1050, 2);
