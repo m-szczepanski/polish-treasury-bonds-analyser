@@ -40,7 +40,7 @@ export class InvestmentStrategyComponent {
 
     frequencyMonths = signal(1);
     durationMonths = signal(12);
-    inflationRate = signal(4.5);
+    inflationRate = signal(Constants.INFLATION_RATE);
 
     configurations = signal<BondStrategyConfig[]>(this.initializeConfigurations());
 
