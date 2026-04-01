@@ -28,7 +28,7 @@ export class Constants {
       type: BondType.OTS,
       name: '3-miesięczne',
       description: 'Oszczędnościowe Trzymiesięczne Stałoprocentowe',
-      interestRate: 2.5,
+      interestRate: 2,
       durationMonths: 3,
       isIndexedToInflation: false,
       capitalizationFreqMonths: 0, // At maturity
@@ -38,7 +38,7 @@ export class Constants {
       type: BondType.ROR,
       name: 'Roczne',
       description: 'Roczne Oszczędnościowe Referencyjne',
-      interestRate: 4.25,
+      interestRate: 4,
       durationMonths: 12,
       isIndexedToInflation: false, // Floating but not inflation indexed directly (NBP reference rate)
       capitalizationFreqMonths: 1, // Monthly payment
@@ -48,7 +48,7 @@ export class Constants {
       type: BondType.DOR,
       name: '2-letnie',
       description: 'Dwuletnie Oszczędnościowe Referencyjne',
-      interestRate: 4.4,
+      interestRate: 4.15,
       durationMonths: 24,
       isIndexedToInflation: false, // Floating (NBP reference rate)
       capitalizationFreqMonths: 1, // Monthly payment
@@ -58,7 +58,7 @@ export class Constants {
       type: BondType.TOS,
       name: '3-letnie',
       description: 'Trzyletnie Oszczędnościowe Stałoprocentowe',
-      interestRate: 4.65,
+      interestRate: 4.4,
       durationMonths: 36,
       isIndexedToInflation: false,
       capitalizationFreqMonths: 12, // Annual capitalization
@@ -68,7 +68,7 @@ export class Constants {
       type: BondType.COI,
       name: '4-letnie',
       description: 'Czteroletnie Oszczędnościowe Indeksowane Inflacją',
-      interestRate: 5, // First year fixed
+      interestRate: 4.75, // First year fixed
       durationMonths: 48,
       isIndexedToInflation: true,
       capitalizationFreqMonths: 12, // Annual payment
@@ -78,7 +78,7 @@ export class Constants {
       type: BondType.EDO,
       name: '10-letnie',
       description: 'Emerytalne Dziesięcioletnie Oszczędnościowe',
-      interestRate: 5.6, // First year fixed
+      interestRate: 5.35, // First year fixed
       durationMonths: 120,
       isIndexedToInflation: true,
       capitalizationFreqMonths: 12, // Annual capitalization
