@@ -8,8 +8,9 @@
     <div class="slider-container">
       <label for="global-investment">Kwota inwestycji: <strong>{{ investmentAmount() | number: '1.0-0' }}
           PLN</strong></label>
-      <input id="global-investment" type="range" min="100" max="100000" step="100" [ngModel]="investmentAmount()"
-        (ngModelChange)="investmentAmount.set($event)" class="global-slider" />
+      <input id="global-investment" type="range" [min]="minInvestmentAmount" [max]="maxInvestmentAmount"
+        [step]="investmentStep" [value]="investmentAmount()" (input)="onInvestmentInput($event)"
+        class="global-slider" />
     </div>
   </div>
 
