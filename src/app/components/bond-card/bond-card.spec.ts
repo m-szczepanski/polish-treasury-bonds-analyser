@@ -66,7 +66,7 @@ describe('BondCardComponent', () => {
   });
 
   it('should return correct profit color', () => {
-    expect(component.profitColor).toBe('#2e7d32');
+    expect(component.resultSummary().profitColor).toBe('#2e7d32');
   });
 
 });

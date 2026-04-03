@@ -1,7 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { debounceTime } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
@@ -9,6 +7,9 @@ import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { Bond, BondType, Constants } from '../../logic/constants';
 import { BondCalculatorService, SimulationResult } from '../../logic/bond-calculator';
 import { ChartConfigService } from '../../logic/chart-config.service';
+import { PortfolioAdvisorService } from '../../services/portfolio-advisor.service';
+import { createDebouncedSignal } from '../../logic/signal-utils';
+import { createDefaultPortfolioItem, UI_DEFAULTS } from '../../logic/ui-defaults';
 
 interface PortfolioItem {
     bondType: BondType;
@@ -46,20 +47,21 @@ interface PortfolioCalculationResult {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PortfolioAnalysisComponent {
-    private bondCalculator = inject(BondCalculatorService);
-    private chartConfig = inject(ChartConfigService);
-    private platformId = inject(PLATFORM_ID);
-    private readonly analysisInflationRate = 5.0;
-    private readonly defaultPortfolioItem: PortfolioItem = { bondType: BondType.OTS, amount: 1000 };
+    private readonly bondCalculator = inject(BondCalculatorService);
+    private readonly chartConfig = inject(ChartConfigService);
+    private readonly portfolioAdvisor = inject(PortfolioAdvisorService);
+    private readonly platformId = inject(PLATFORM_ID);
+    private readonly analysisInflationRate = UI_DEFAULTS.PORTFOLIO_ANALYSIS_INFLATION_RATE;
+    private readonly defaultPortfolioItem: PortfolioItem = createDefaultPortfolioItem();
     private readonly bondsByType = new Map(Constants.BONDS.map(bond => [bond.type, bond] as const));
-    isBrowser = isPlatformBrowser(this.platformId);
+    readonly isBrowser = isPlatformBrowser(this.platformId);
 
-    availableBonds = Constants.BONDS;
+    readonly availableBonds = Constants.BONDS;
 
-    portfolio = signal<PortfolioItem[]>([{ ...this.defaultPortfolioItem }]);
-    investmentHorizon = signal<number>(12);
+    readonly portfolio = signal<PortfolioItem[]>([{ ...this.defaultPortfolioItem }]);
+    readonly investmentHorizon = signal<number>(UI_DEFAULTS.PORTFOLIO_DEFAULT_HORIZON_MONTHS);
 
-    calculationResult = computed<PortfolioCalculationResult>(() => {
+    readonly calculationResult = computed<PortfolioCalculationResult>(() => {
         const items = this.portfolio();
         const horizon = this.investmentHorizon();
         const summary: PortfolioSummary = { totalInvestment: 0, totalProfit: 0, tax: 0, netProfit: 0 };
@@ -102,41 +104,24 @@ export class PortfolioAnalysisComponent {
         };
     });
 
-    debouncedResult = toSignal(
-        toObservable(this.calculationResult).pipe(
-            debounceTime(this.isBrowser ? Constants.CHART_DEBOUNCE_MS : 0)
-        ),
-        { initialValue: this.calculationResult() }
+    readonly debouncedResult = createDebouncedSignal(
+        this.calculationResult,
+        Constants.CHART_DEBOUNCE_MS,
+        this.isBrowser,
+        this.calculationResult()
     );
 
-    summary = computed(() => this.calculationResult().summary);
+    readonly summary = computed(() => this.calculationResult().summary);
 
-    optimizationTip = computed(() => {
-        const horizon = this.investmentHorizon();
-        const items = this.portfolio();
-
-        if (horizon <= 3) {
-            if (items.some(p => p.bondType !== BondType.OTS)) {
-                return 'Dla bardzo krótkiego okresu (do 3 miesięcy) obligacje OTS są zazwyczaj najlepsze, gdyż nie mają opłaty za wcześniejszy wykup.';
-            }
-            return 'Twój portfel wygląda optymalnie dla krótkiego horyzontu czasowego.';
-        }
-
-        if (horizon >= 12 && horizon < 36) {
-            if (items.some(p => p.bondType === BondType.OTS)) {
-                return 'Dla okresu powyżej roku, obligacje indeksowane inflacją (np. COI) mogą przynieść wyższy zysk niż krótkoterminowe OTS.';
-            }
-            return 'Dla średniego horyzontu warto rozważyć dywersyfikację między obligacjami stałoprocentowymi a indeksowanymi inflacją.';
-        }
-
-        return 'Dla długiego horyzontu (powyżej 3 lat) obligacje EDO (10-letnie) zazwyczaj oferują najlepszy zwrot dzięki procentowi składanemu.';
-    });
+    readonly optimizationTip = computed(() =>
+        this.portfolioAdvisor.getOptimizationTip(this.investmentHorizon(), this.portfolio())
+    );
 
     // Charts
-    pieChartType: ChartType = 'pie';
-    profitChartType: ChartType = 'line';
+    readonly pieChartType: ChartType = 'pie';
+    readonly profitChartType: ChartType = 'line';
 
-    pieChartData = computed<ChartData<'pie', number[], string | string[]>>(() => {
+    readonly pieChartData = computed<ChartData<'pie', number[], string | string[]>>(() => {
         const res = this.debouncedResult();
         if (!res) return { labels: [], datasets: [] };
         const map = res.compositionMap;
@@ -151,7 +136,7 @@ export class PortfolioAnalysisComponent {
         };
     });
 
-    profitChartData = computed<ChartData<'line'>>(() => {
+    readonly profitChartData = computed<ChartData<'line'>>(() => {
         const res = this.debouncedResult();
         if (!res) return { labels: [], datasets: [] };
 
@@ -182,13 +167,13 @@ export class PortfolioAnalysisComponent {
         };
     });
 
-    pieChartOptions: ChartConfiguration['options'] = {
+    readonly pieChartOptions: ChartConfiguration['options'] = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: { legend: { position: 'right' } }
     };
 
-    profitChartOptions: ChartConfiguration['options'] = this.chartConfig.defaultBaseChartOptions;
+    readonly profitChartOptions: ChartConfiguration['options'] = this.chartConfig.defaultBaseChartOptions;
 
     addBond() {
         this.portfolio.update(curr => [...curr, { ...this.defaultPortfolioItem }]);

@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BondCardComponent } from '../bond-card/bond-card';
 import { Constants } from '../../logic/constants';
+import { UI_DEFAULTS } from '../../logic/ui-defaults';
 
 @Component({
   selector: 'app-main-page',
@@ -12,14 +13,14 @@ import { Constants } from '../../logic/constants';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainPageComponent {
-  private readonly defaultInvestmentAmount = 1000;
+  private readonly defaultInvestmentAmount: number = UI_DEFAULTS.DEFAULT_INVESTMENT_AMOUNT;
 
-  readonly minInvestmentAmount = 100;
-  readonly maxInvestmentAmount = 100000;
-  readonly investmentStep = 100;
+  readonly minInvestmentAmount = UI_DEFAULTS.MIN_INVESTMENT_AMOUNT;
+  readonly maxInvestmentAmount = UI_DEFAULTS.MAX_INVESTMENT_AMOUNT;
+  readonly investmentStep = UI_DEFAULTS.INVESTMENT_STEP;
 
   readonly bonds = Constants.BONDS;
-  readonly investmentAmount = signal(this.defaultInvestmentAmount);
+  readonly investmentAmount = signal<number>(this.defaultInvestmentAmount);
 
   onInvestmentInput(event: Event): void {
     const input = event.target as HTMLInputElement | null;

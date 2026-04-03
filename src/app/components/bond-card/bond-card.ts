@@ -1,13 +1,12 @@
 import { Component, computed, inject, input, ChangeDetectionStrategy, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { debounceTime } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { Bond, Constants } from '../../logic/constants';
 import { BondCalculatorService, SimulationResult } from '../../logic/bond-calculator';
 import { ChartConfigService } from '../../logic/chart-config.service';
+import { createDebouncedSignal } from '../../logic/signal-utils';
 
 @Component({
   selector: 'app-bond-card',
@@ -34,10 +33,11 @@ export class BondCardComponent {
     return this.bondCalculator.simulate(bond, amount, Constants.INFLATION_RATE);
   });
 
-  readonly debouncedResult = toSignal(
-    toObservable(this.simulationResult).pipe(
-      debounceTime(this.isBrowser ? Constants.CHART_DEBOUNCE_MS : 0)
-    ), { initialValue: null as SimulationResult | null }
+  readonly debouncedResult = createDebouncedSignal(
+    this.simulationResult,
+    Constants.CHART_DEBOUNCE_MS,
+    this.isBrowser,
+    null as SimulationResult | null
   );
 
   readonly resultSummary = computed(() => {
@@ -72,8 +72,4 @@ export class BondCardComponent {
 
   readonly lineChartOptions: ChartConfiguration['options'] = this.chartConfig.defaultBaseChartOptions;
   readonly lineChartType: ChartType = 'line';
-
-  get profitColor(): string {
-    return this.resultSummary().profitColor;
-  }
 }

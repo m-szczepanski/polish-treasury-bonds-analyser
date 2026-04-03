@@ -48,8 +48,4 @@ export class TopMenuComponent {
             href: 'https://www.obligacjeskarbowe.pl/'
         }
     ];
-
-    trackMenuItem(index: number): number {
-        return index;
-    }
 }

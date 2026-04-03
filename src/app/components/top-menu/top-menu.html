@@ -1,6 +1,6 @@
 <nav class="top-menu">
     <div class="menu-items">
-        @for (item of menuItems; track trackMenuItem($index)) {
+        @for (item of menuItems; track item.label) {
         @if (item.kind === 'internal') {
         <a [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: !!item.exact }"
             class="menu-item">
