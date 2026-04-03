@@ -18,7 +18,7 @@ export class PortfolioAdvisorService {
     }
 
     if (horizonMonths >= 4 && horizonMonths < 12) {
-      if (items.some((item) => item.bondType !== BondType.OTS)) {
+      if (items.some((item) => item.bondType !== BondType.OTS && item.bondType !== BondType.ROR)) {
         return 'Dla horyzontu 4-11 miesięcy warto preferować obligacje krótszego terminu (OTS lub ROR), aby ograniczyć ryzyko kosztownego wcześniejszego wykupu.';
       }
       return 'Twój portfel wygląda rozsądnie dla horyzontu 4-11 miesięcy.';
