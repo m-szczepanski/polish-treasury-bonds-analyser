@@ -66,6 +66,15 @@ describe('InvestmentStrategyFacadeService', () => {
     expect(byType(afterReinvest, BondType.OTS).recurringAmount).toBe(UI_DEFAULTS.STRATEGY_RECURRING_AMOUNT);
   });
 
+  it('keeps configurations unchanged when bond type does not exist', () => {
+    const configs = service.createInitialConfigurations();
+
+    const updated = service.toggleBondSelection(configs, 'UNKNOWN' as BondType);
+
+    expect(updated).not.toBe(configs);
+    expect(updated).toEqual(configs);
+  });
+
   it('returns null simulation for invalid inputs or no active bonds', () => {
     const base = service.createInitialConfigurations();
 
