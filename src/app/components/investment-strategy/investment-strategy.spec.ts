@@ -44,7 +44,7 @@ describe('InvestmentStrategyComponent', () => {
     it('should select bond and update state', () => {
         const configs = component.configurations();
         const config = configs[0];
-        component.toggleBond(config);
+        component.toggleBond(config.bond.type);
 
         const updatedConfig = component.configurations()[0];
         expect(updatedConfig.isSelected).toBe(true);
@@ -52,7 +52,7 @@ describe('InvestmentStrategyComponent', () => {
 
     it('should calculate strategy when inputs change', async () => {
         const config = component.configurations()[0];
-        component.toggleBond(config);
+        component.toggleBond(config.bond.type);
 
         component.durationMonths.set(24);
 
@@ -63,8 +63,8 @@ describe('InvestmentStrategyComponent', () => {
 
     it('should correctly aggregate multiple selected bonds', async () => {
         const configs = component.configurations();
-        component.toggleBond(configs[0]);
-        component.toggleBond(configs[1]);
+        component.toggleBond(configs[0].bond.type);
+        component.toggleBond(configs[1].bond.type);
 
         fixture.detectChanges();
         await new Promise(resolve => setTimeout(resolve, Constants.CHART_DEBOUNCE_MS + 100));
@@ -75,7 +75,7 @@ describe('InvestmentStrategyComponent', () => {
 
     it('should update chart update flag', async () => {
         const config = component.configurations()[0];
-        component.toggleBond(config);
+        component.toggleBond(config.bond.type);
 
         fixture.detectChanges();
         await new Promise(resolve => setTimeout(resolve, Constants.CHART_DEBOUNCE_MS + 100));

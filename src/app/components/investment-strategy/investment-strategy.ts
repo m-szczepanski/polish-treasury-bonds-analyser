@@ -4,7 +4,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Bond, Constants } from '../../logic/constants';
+import { Bond, BondType, Constants } from '../../logic/constants';
 import { StrategyCalculatorService, StrategyResult } from '../../logic/strategy-calculator';
 import { ChartConfiguration, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
@@ -22,6 +22,20 @@ export interface ChartSet {
     title: string;
     data: ChartConfiguration['data'];
     options: ChartConfiguration['options'];
+}
+
+interface SimulatedBond {
+    config: BondStrategyConfig;
+    result: StrategyResult;
+}
+
+interface AggregatedStrategyResult {
+    months: number[];
+    totalValue: number[];
+    totalInvested: number[];
+    totalProfit: number;
+    netProfit: number;
+    simulations: SimulatedBond[];
 }
 
 @Component({
@@ -44,7 +58,7 @@ export class InvestmentStrategyComponent {
 
     configurations = signal<BondStrategyConfig[]>(this.initializeConfigurations());
 
-    simulation = computed(() => {
+    simulation = computed<AggregatedStrategyResult | null>(() => {
         const freq = this.frequencyMonths();
         const dur = this.durationMonths();
         const infl = this.inflationRate();
@@ -98,35 +112,36 @@ export class InvestmentStrategyComponent {
         }
     }
 
-    toggleBond(config: BondStrategyConfig) {
-        const current = this.configurations();
-        const index = current.indexOf(config);
-        if (index > -1) {
-            const updated = [...current];
-            updated[index] = { ...config, isSelected: !config.isSelected };
-            this.configurations.set(updated);
-        }
+    toggleBond(bondType: BondType) {
+        this.updateConfiguration(bondType, config => ({ ...config, isSelected: !config.isSelected }));
     }
 
-    updateConfigValue<K extends keyof BondStrategyConfig>(config: BondStrategyConfig, field: K, value: BondStrategyConfig[K]) {
-        const current = this.configurations();
-        const index = current.indexOf(config);
-        if (index > -1) {
-            const updated = [...current];
-
-            let finalValue: BondStrategyConfig[K];
-            if (field === 'initialAmount' || field === 'recurringAmount') {
-                finalValue = Number(value) as BondStrategyConfig[K];
-            } else {
-                finalValue = value;
-            }
-
-            updated[index] = { ...config, [field]: finalValue };
-            this.configurations.set(updated);
+    updateConfigValue<K extends keyof BondStrategyConfig>(bondType: BondType, field: K, value: BondStrategyConfig[K]) {
+        let finalValue: BondStrategyConfig[K];
+        if (field === 'initialAmount' || field === 'recurringAmount') {
+            finalValue = Number(value) as BondStrategyConfig[K];
+        } else {
+            finalValue = value;
         }
+
+        this.updateConfiguration(bondType, config => ({ ...config, [field]: finalValue }));
     }
 
-    private performCalculation(frequencyMonths: number, durationMonths: number, inflationRate: number, configurations: BondStrategyConfig[]) {
+    private updateConfiguration(
+        bondType: BondType,
+        updater: (config: BondStrategyConfig) => BondStrategyConfig
+    ) {
+        this.configurations.update(current =>
+            current.map(config => (config.bond.type === bondType ? updater(config) : config))
+        );
+    }
+
+    private performCalculation(
+        frequencyMonths: number,
+        durationMonths: number,
+        inflationRate: number,
+        configurations: BondStrategyConfig[]
+    ): AggregatedStrategyResult | null {
         if (frequencyMonths <= 0 || durationMonths <= 0 || inflationRate < 0) return null;
 
         const activeConfigs = configurations.filter(c => c.isSelected);
@@ -181,28 +196,21 @@ export class InvestmentStrategyComponent {
         };
     }
 
-    private createSummaryChart(result: StrategyResult): ChartSet {
-        const labels = result.months.map((m: number) => `M${m}`);
-        const dsValue = this.chartConfig.getDataset('Całkowita wartość', result.totalValue, true, true);
-        const dsInvested = this.chartConfig.getDataset('Wpłacony kapitał', result.totalInvested, false, false, [5, 5]);
-
-        return {
-            title: 'Podsumowanie Portfela',
-            data: {
-                datasets: [dsValue, dsInvested],
-                labels
-            } as ChartConfiguration<'line'>['data'],
-            options: this.chartConfig.defaultBaseChartOptions
-        };
+    private createSummaryChart(result: AggregatedStrategyResult): ChartSet {
+        return this.createChart(result, 'Podsumowanie Portfela');
     }
 
     private createIndividualChart(config: BondStrategyConfig, result: StrategyResult): ChartSet {
+        return this.createChart(result, config.bond.name);
+    }
+
+    private createChart(result: StrategyResult, title: string): ChartSet {
         const labels = result.months.map((m: number) => `M${m}`);
         const dsValue = this.chartConfig.getDataset('Całkowita wartość', result.totalValue, true, true);
         const dsInvested = this.chartConfig.getDataset('Wpłacony kapitał', result.totalInvested, false, false, [5, 5]);
 
         return {
-            title: config.bond.name,
+            title,
             data: {
                 datasets: [dsValue, dsInvested],
                 labels
