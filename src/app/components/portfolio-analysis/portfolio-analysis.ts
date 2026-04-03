@@ -6,8 +6,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
-import { BondType, Constants } from '../../logic/constants';
-import { BondCalculatorService } from '../../logic/bond-calculator';
+import { Bond, BondType, Constants } from '../../logic/constants';
+import { BondCalculatorService, SimulationResult } from '../../logic/bond-calculator';
 import { ChartConfigService } from '../../logic/chart-config.service';
 
 interface PortfolioItem {
@@ -22,6 +22,21 @@ interface PortfolioSummary {
     netProfit: number;
 }
 
+interface SimulatedPortfolioItem {
+    item: PortfolioItem;
+    bond: Bond;
+    maturitySimulation: SimulationResult;
+    grossProfit: number;
+    netProfit: number;
+    tax: number;
+}
+
+interface PortfolioCalculationResult {
+    summary: PortfolioSummary;
+    compositionMap: Map<BondType, number>;
+    simulatedItems: SimulatedPortfolioItem[];
+}
+
 @Component({
     selector: 'app-portfolio-analysis',
     standalone: true,
@@ -34,58 +49,56 @@ export class PortfolioAnalysisComponent {
     private bondCalculator = inject(BondCalculatorService);
     private chartConfig = inject(ChartConfigService);
     private platformId = inject(PLATFORM_ID);
+    private readonly analysisInflationRate = 5.0;
+    private readonly defaultPortfolioItem: PortfolioItem = { bondType: BondType.OTS, amount: 1000 };
+    private readonly bondsByType = new Map(Constants.BONDS.map(bond => [bond.type, bond] as const));
     isBrowser = isPlatformBrowser(this.platformId);
 
     availableBonds = Constants.BONDS;
 
-    portfolio = signal<PortfolioItem[]>([{ bondType: BondType.OTS, amount: 1000 }]);
+    portfolio = signal<PortfolioItem[]>([{ ...this.defaultPortfolioItem }]);
     investmentHorizon = signal<number>(12);
 
-    calculationResult = computed(() => {
+    calculationResult = computed<PortfolioCalculationResult>(() => {
         const items = this.portfolio();
         const horizon = this.investmentHorizon();
         const summary: PortfolioSummary = { totalInvestment: 0, totalProfit: 0, tax: 0, netProfit: 0 };
-        const compositionMap = new Map<string, number>();
+        const compositionMap = new Map<BondType, number>();
+        const simulatedItems: SimulatedPortfolioItem[] = [];
 
-        const simulatedItems = items.map(item => {
+        for (const item of items) {
             summary.totalInvestment += item.amount;
             const currentAmount = compositionMap.get(item.bondType) || 0;
             compositionMap.set(item.bondType, currentAmount + item.amount);
 
-            const bond = this.availableBonds.find(b => b.type === item.bondType);
-            if (!bond) return null;
-
-            let grossProfit = 0;
-            let netProfit = 0;
-            let tax = 0;
-
-            if (horizon < bond.durationMonths) {
-                try {
-                    const res = this.bondCalculator.simulateEarlyRedemption(bond, item.amount, horizon, 5.0);
-                    netProfit = res.netProfit;
-                    tax = res.tax;
-                    grossProfit = res.grossProfit - res.earlyRedemptionFee;
-                } catch (e) {
-                    console.error(e);
-                }
-            } else {
-                const res = this.bondCalculator.simulate(bond, item.amount, 5.0);
-                grossProfit = res.totalProfit;
-                netProfit = res.netProfit;
-                tax = grossProfit - netProfit;
+            const bond = this.bondsByType.get(item.bondType);
+            if (!bond) {
+                continue;
             }
+
+            const maturitySimulation = this.bondCalculator.simulate(
+                bond,
+                item.amount,
+                this.analysisInflationRate
+            );
+            const { grossProfit, netProfit, tax } = this.calculateProfitAtHorizon(
+                bond,
+                item.amount,
+                horizon,
+                maturitySimulation
+            );
 
             summary.totalProfit += grossProfit;
             summary.netProfit += netProfit;
             summary.tax += tax;
 
-            return { item, bond };
-        });
+            simulatedItems.push({ item, bond, maturitySimulation, grossProfit, netProfit, tax });
+        }
 
         return {
             summary,
             compositionMap,
-            simulatedItems: simulatedItems.filter(i => i !== null)
+            simulatedItems
         };
     });
 
@@ -143,23 +156,15 @@ export class PortfolioAnalysisComponent {
         if (!res) return { labels: [], datasets: [] };
 
         const horizon = this.investmentHorizon();
-        const items = this.portfolio();
         const months = Array.from({ length: horizon + 1 }, (_, i) => i);
         const timelineValues = new Array(horizon + 1).fill(0);
 
-        items.forEach(item => {
-            const bond = this.availableBonds.find(b => b.type === item.bondType);
-            if (!bond) return;
-
-            const simResult = this.bondCalculator.simulate(bond, item.amount, 5.0);
+        res.simulatedItems.forEach(simulatedItem => {
+            const simValues = simulatedItem.maturitySimulation.values;
+            const finalValue = simValues[simValues.length - 1] ?? 0;
 
             for (let m = 0; m <= horizon; m++) {
-                let val = 0;
-                if (m < simResult.values.length) {
-                    val = simResult.values[m];
-                } else {
-                    val = simResult.values[simResult.values.length - 1];
-                }
+                const val = m < simValues.length ? simValues[m] : finalValue;
                 timelineValues[m] += val;
             }
         });
@@ -186,7 +191,7 @@ export class PortfolioAnalysisComponent {
     profitChartOptions: ChartConfiguration['options'] = this.chartConfig.defaultBaseChartOptions;
 
     addBond() {
-        this.portfolio.update(curr => [...curr, { bondType: BondType.OTS, amount: 1000 }]);
+        this.portfolio.update(curr => [...curr, { ...this.defaultPortfolioItem }]);
     }
 
     removeBond(index: number) {
@@ -197,18 +202,45 @@ export class PortfolioAnalysisComponent {
     }
 
     updateBondType(index: number, type: BondType) {
-        this.portfolio.update(curr => {
-            const copy = [...curr];
-            copy[index] = { ...copy[index], bondType: type };
-            return copy;
-        });
+        this.updatePortfolioItem(index, item => ({ ...item, bondType: type }));
     }
 
     updateBondAmount(index: number, amount: number) {
-        this.portfolio.update(curr => {
-            const copy = [...curr];
-            copy[index] = { ...copy[index], amount: Number(amount) };
-            return copy;
-        });
+        this.updatePortfolioItem(index, item => ({ ...item, amount: Number(amount) }));
+    }
+
+    private updatePortfolioItem(index: number, updater: (item: PortfolioItem) => PortfolioItem) {
+        this.portfolio.update(curr => curr.map((item, currentIndex) => (currentIndex === index ? updater(item) : item)));
+    }
+
+    private calculateProfitAtHorizon(
+        bond: Bond,
+        amount: number,
+        horizon: number,
+        maturitySimulation: SimulationResult
+    ): Pick<SimulatedPortfolioItem, 'grossProfit' | 'netProfit' | 'tax'> {
+        if (horizon > 0 && horizon < bond.durationMonths) {
+            const early = this.bondCalculator.simulateEarlyRedemption(
+                bond,
+                amount,
+                horizon,
+                this.analysisInflationRate
+            );
+
+            return {
+                grossProfit: early.grossProfit - early.earlyRedemptionFee,
+                netProfit: early.netProfit,
+                tax: early.tax
+            };
+        }
+
+        const grossProfit = maturitySimulation.totalProfit;
+        const netProfit = maturitySimulation.netProfit;
+
+        return {
+            grossProfit,
+            netProfit,
+            tax: grossProfit - netProfit
+        };
     }
 }
