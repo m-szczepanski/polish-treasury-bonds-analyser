@@ -47,7 +47,7 @@
                 <label>Obligacje i Kwoty</label>
                 <div class="radio-list">
                     <div *ngFor="let config of configurations()" class="config-item">
-                        <div class="config-header" (click)="toggleBond(config)">
+                        <div class="config-header" (click)="toggleBond(config.bond.type)">
                             <div class="radio-circle checkbox-style">
                                 <div class="radio-inner" *ngIf="config.isSelected"></div>
                             </div>
@@ -63,13 +63,13 @@
                                 <div class="input-wrapper">
                                     <label>Start (zł)</label>
                                     <input type="number" [ngModel]="config.initialAmount"
-                                        (ngModelChange)="updateConfigValue(config, 'initialAmount', $event)"
+                                        (ngModelChange)="updateConfigValue(config.bond.type, 'initialAmount', $event)"
                                         [ngModelOptions]="{updateOn: 'blur'}" min="0" step="100">
                                 </div>
                                 <div class="input-wrapper">
                                     <label>Cyklicznie (zł)</label>
                                     <input type="number" [ngModel]="config.recurringAmount"
-                                        (ngModelChange)="updateConfigValue(config, 'recurringAmount', $event)"
+                                        (ngModelChange)="updateConfigValue(config.bond.type, 'recurringAmount', $event)"
                                         [ngModelOptions]="{updateOn: 'blur'}" min="0" step="100">
                                 </div>
                             </div>
@@ -77,7 +77,7 @@
                                 <div class="checkbox-wrapper">
                                     <input type="checkbox" [id]="'reinvest-' + config.bond.type"
                                         [ngModel]="config.reinvest"
-                                        (ngModelChange)="updateConfigValue(config, 'reinvest', $event)">
+                                        (ngModelChange)="updateConfigValue(config.bond.type, 'reinvest', $event)">
                                     <label [for]="'reinvest-' + config.bond.type">Reinwestuj zysk po zakończeniu
                                         obligacji</label>
                                     <div class="tooltip-wrapper" tabindex="0">

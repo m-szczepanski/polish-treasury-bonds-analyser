@@ -1,14 +1,15 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { debounceTime } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
-import { BondType, Constants } from '../../logic/constants';
-import { BondCalculatorService } from '../../logic/bond-calculator';
+import { Bond, BondType, Constants } from '../../logic/constants';
+import { BondCalculatorService, SimulationResult } from '../../logic/bond-calculator';
 import { ChartConfigService } from '../../logic/chart-config.service';
+import { PortfolioAdvisorService } from '../../services/portfolio-advisor.service';
+import { createDebouncedSignal } from '../../logic/signal-utils';
+import { createDefaultPortfolioItem, UI_DEFAULTS } from '../../logic/ui-defaults';
 
 interface PortfolioItem {
     bondType: BondType;
@@ -22,6 +23,21 @@ interface PortfolioSummary {
     netProfit: number;
 }
 
+interface SimulatedPortfolioItem {
+    item: PortfolioItem;
+    bond: Bond;
+    maturitySimulation: SimulationResult;
+    grossProfit: number;
+    netProfit: number;
+    tax: number;
+}
+
+interface PortfolioCalculationResult {
+    summary: PortfolioSummary;
+    compositionMap: Map<BondType, number>;
+    simulatedItems: SimulatedPortfolioItem[];
+}
+
 @Component({
     selector: 'app-portfolio-analysis',
     standalone: true,
@@ -31,99 +47,81 @@ interface PortfolioSummary {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PortfolioAnalysisComponent {
-    private bondCalculator = inject(BondCalculatorService);
-    private chartConfig = inject(ChartConfigService);
-    private platformId = inject(PLATFORM_ID);
-    isBrowser = isPlatformBrowser(this.platformId);
+    private readonly bondCalculator = inject(BondCalculatorService);
+    private readonly chartConfig = inject(ChartConfigService);
+    private readonly portfolioAdvisor = inject(PortfolioAdvisorService);
+    private readonly platformId = inject(PLATFORM_ID);
+    private readonly analysisInflationRate = UI_DEFAULTS.PORTFOLIO_ANALYSIS_INFLATION_RATE;
+    private readonly defaultPortfolioItem: PortfolioItem = createDefaultPortfolioItem();
+    private readonly bondsByType = new Map(Constants.BONDS.map(bond => [bond.type, bond] as const));
+    readonly isBrowser = isPlatformBrowser(this.platformId);
 
-    availableBonds = Constants.BONDS;
+    readonly availableBonds = Constants.BONDS;
 
-    portfolio = signal<PortfolioItem[]>([{ bondType: BondType.OTS, amount: 1000 }]);
-    investmentHorizon = signal<number>(12);
+    readonly portfolio = signal<PortfolioItem[]>([{ ...this.defaultPortfolioItem }]);
+    readonly investmentHorizon = signal<number>(UI_DEFAULTS.PORTFOLIO_DEFAULT_HORIZON_MONTHS);
 
-    calculationResult = computed(() => {
+    readonly calculationResult = computed<PortfolioCalculationResult>(() => {
         const items = this.portfolio();
         const horizon = this.investmentHorizon();
         const summary: PortfolioSummary = { totalInvestment: 0, totalProfit: 0, tax: 0, netProfit: 0 };
-        const compositionMap = new Map<string, number>();
+        const compositionMap = new Map<BondType, number>();
+        const simulatedItems: SimulatedPortfolioItem[] = [];
 
-        const simulatedItems = items.map(item => {
+        for (const item of items) {
             summary.totalInvestment += item.amount;
             const currentAmount = compositionMap.get(item.bondType) || 0;
             compositionMap.set(item.bondType, currentAmount + item.amount);
 
-            const bond = this.availableBonds.find(b => b.type === item.bondType);
-            if (!bond) return null;
-
-            let grossProfit = 0;
-            let netProfit = 0;
-            let tax = 0;
-
-            if (horizon < bond.durationMonths) {
-                try {
-                    const res = this.bondCalculator.simulateEarlyRedemption(bond, item.amount, horizon, 5.0);
-                    netProfit = res.netProfit;
-                    tax = res.tax;
-                    grossProfit = res.grossProfit - res.earlyRedemptionFee;
-                } catch (e) {
-                    console.error(e);
-                }
-            } else {
-                const res = this.bondCalculator.simulate(bond, item.amount, 5.0);
-                grossProfit = res.totalProfit;
-                netProfit = res.netProfit;
-                tax = grossProfit - netProfit;
+            const bond = this.bondsByType.get(item.bondType);
+            if (!bond) {
+                continue;
             }
+
+            const maturitySimulation = this.bondCalculator.simulate(
+                bond,
+                item.amount,
+                this.analysisInflationRate
+            );
+            const { grossProfit, netProfit, tax } = this.calculateProfitAtHorizon(
+                bond,
+                item.amount,
+                horizon,
+                maturitySimulation
+            );
 
             summary.totalProfit += grossProfit;
             summary.netProfit += netProfit;
             summary.tax += tax;
 
-            return { item, bond };
-        });
+            simulatedItems.push({ item, bond, maturitySimulation, grossProfit, netProfit, tax });
+        }
 
         return {
             summary,
             compositionMap,
-            simulatedItems: simulatedItems.filter(i => i !== null)
+            simulatedItems
         };
     });
 
-    debouncedResult = toSignal(
-        toObservable(this.calculationResult).pipe(
-            debounceTime(this.isBrowser ? Constants.CHART_DEBOUNCE_MS : 0)
-        ),
-        { initialValue: this.calculationResult() }
+    readonly debouncedResult = createDebouncedSignal(
+        this.calculationResult,
+        Constants.CHART_DEBOUNCE_MS,
+        this.isBrowser,
+        this.calculationResult()
     );
 
-    summary = computed(() => this.calculationResult().summary);
+    readonly summary = computed(() => this.calculationResult().summary);
 
-    optimizationTip = computed(() => {
-        const horizon = this.investmentHorizon();
-        const items = this.portfolio();
-
-        if (horizon <= 3) {
-            if (items.some(p => p.bondType !== BondType.OTS)) {
-                return 'Dla bardzo krótkiego okresu (do 3 miesięcy) obligacje OTS są zazwyczaj najlepsze, gdyż nie mają opłaty za wcześniejszy wykup.';
-            }
-            return 'Twój portfel wygląda optymalnie dla krótkiego horyzontu czasowego.';
-        }
-
-        if (horizon >= 12 && horizon < 36) {
-            if (items.some(p => p.bondType === BondType.OTS)) {
-                return 'Dla okresu powyżej roku, obligacje indeksowane inflacją (np. COI) mogą przynieść wyższy zysk niż krótkoterminowe OTS.';
-            }
-            return 'Dla średniego horyzontu warto rozważyć dywersyfikację między obligacjami stałoprocentowymi a indeksowanymi inflacją.';
-        }
-
-        return 'Dla długiego horyzontu (powyżej 3 lat) obligacje EDO (10-letnie) zazwyczaj oferują najlepszy zwrot dzięki procentowi składanemu.';
-    });
+    readonly optimizationTip = computed(() =>
+        this.portfolioAdvisor.getOptimizationTip(this.investmentHorizon(), this.portfolio())
+    );
 
     // Charts
-    pieChartType: ChartType = 'pie';
-    profitChartType: ChartType = 'line';
+    readonly pieChartType: ChartType = 'pie';
+    readonly profitChartType: ChartType = 'line';
 
-    pieChartData = computed<ChartData<'pie', number[], string | string[]>>(() => {
+    readonly pieChartData = computed<ChartData<'pie', number[], string | string[]>>(() => {
         const res = this.debouncedResult();
         if (!res) return { labels: [], datasets: [] };
         const map = res.compositionMap;
@@ -138,28 +136,20 @@ export class PortfolioAnalysisComponent {
         };
     });
 
-    profitChartData = computed<ChartData<'line'>>(() => {
+    readonly profitChartData = computed<ChartData<'line'>>(() => {
         const res = this.debouncedResult();
         if (!res) return { labels: [], datasets: [] };
 
         const horizon = this.investmentHorizon();
-        const items = this.portfolio();
         const months = Array.from({ length: horizon + 1 }, (_, i) => i);
         const timelineValues = new Array(horizon + 1).fill(0);
 
-        items.forEach(item => {
-            const bond = this.availableBonds.find(b => b.type === item.bondType);
-            if (!bond) return;
-
-            const simResult = this.bondCalculator.simulate(bond, item.amount, 5.0);
+        res.simulatedItems.forEach(simulatedItem => {
+            const simValues = simulatedItem.maturitySimulation.values;
+            const finalValue = simValues[simValues.length - 1] ?? 0;
 
             for (let m = 0; m <= horizon; m++) {
-                let val = 0;
-                if (m < simResult.values.length) {
-                    val = simResult.values[m];
-                } else {
-                    val = simResult.values[simResult.values.length - 1];
-                }
+                const val = m < simValues.length ? simValues[m] : finalValue;
                 timelineValues[m] += val;
             }
         });
@@ -177,16 +167,16 @@ export class PortfolioAnalysisComponent {
         };
     });
 
-    pieChartOptions: ChartConfiguration['options'] = {
+    readonly pieChartOptions: ChartConfiguration['options'] = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: { legend: { position: 'right' } }
     };
 
-    profitChartOptions: ChartConfiguration['options'] = this.chartConfig.defaultBaseChartOptions;
+    readonly profitChartOptions: ChartConfiguration['options'] = this.chartConfig.defaultBaseChartOptions;
 
     addBond() {
-        this.portfolio.update(curr => [...curr, { bondType: BondType.OTS, amount: 1000 }]);
+        this.portfolio.update(curr => [...curr, { ...this.defaultPortfolioItem }]);
     }
 
     removeBond(index: number) {
@@ -197,18 +187,45 @@ export class PortfolioAnalysisComponent {
     }
 
     updateBondType(index: number, type: BondType) {
-        this.portfolio.update(curr => {
-            const copy = [...curr];
-            copy[index] = { ...copy[index], bondType: type };
-            return copy;
-        });
+        this.updatePortfolioItem(index, item => ({ ...item, bondType: type }));
     }
 
     updateBondAmount(index: number, amount: number) {
-        this.portfolio.update(curr => {
-            const copy = [...curr];
-            copy[index] = { ...copy[index], amount: Number(amount) };
-            return copy;
-        });
+        this.updatePortfolioItem(index, item => ({ ...item, amount: Number(amount) }));
+    }
+
+    private updatePortfolioItem(index: number, updater: (item: PortfolioItem) => PortfolioItem) {
+        this.portfolio.update(curr => curr.map((item, currentIndex) => (currentIndex === index ? updater(item) : item)));
+    }
+
+    private calculateProfitAtHorizon(
+        bond: Bond,
+        amount: number,
+        horizon: number,
+        maturitySimulation: SimulationResult
+    ): Pick<SimulatedPortfolioItem, 'grossProfit' | 'netProfit' | 'tax'> {
+        if (horizon > 0 && horizon < bond.durationMonths) {
+            const early = this.bondCalculator.simulateEarlyRedemption(
+                bond,
+                amount,
+                horizon,
+                this.analysisInflationRate
+            );
+
+            return {
+                grossProfit: early.grossProfit - early.earlyRedemptionFee,
+                netProfit: early.netProfit,
+                tax: early.tax
+            };
+        }
+
+        const grossProfit = maturitySimulation.totalProfit;
+        const netProfit = maturitySimulation.netProfit;
+
+        return {
+            grossProfit,
+            netProfit,
+            tax: grossProfit - netProfit
+        };
     }
 }

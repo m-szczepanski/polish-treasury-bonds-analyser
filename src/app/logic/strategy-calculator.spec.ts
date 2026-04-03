@@ -196,6 +196,36 @@ describe('StrategyCalculatorService', () => {
                 };
                 expect(() => service.simulate(request)).toThrowError('Investment amounts must be non-negative');
             });
+
+            it('should throw error for negative duration', () => {
+                const request: StrategyRequest = {
+                    bond: otsBond,
+                    initialAmount: 1000,
+                    recurringAmount: 0,
+                    frequencyMonths: 1,
+                    durationMonths: -1,
+                    inflationRate: 0,
+                    reinvest: false
+                };
+
+                expect(() => service.simulate(request)).toThrowError('Duration must be non-negative');
+            });
+
+            it('should throw error when recurring amount is positive and frequency is non-positive', () => {
+                const request: StrategyRequest = {
+                    bond: otsBond,
+                    initialAmount: 0,
+                    recurringAmount: 500,
+                    frequencyMonths: 0,
+                    durationMonths: 12,
+                    inflationRate: 0,
+                    reinvest: false
+                };
+
+                expect(() => service.simulate(request)).toThrowError(
+                    'Frequency must be positive if recurring amount is positive'
+                );
+            });
         });
 
     });

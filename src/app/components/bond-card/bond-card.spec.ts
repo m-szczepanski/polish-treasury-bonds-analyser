@@ -1,4 +1,5 @@
 import 'zone.js/testing';
+import { PLATFORM_ID } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BondCardComponent } from './bond-card';
 import { Bond, BondType, Constants } from '../../logic/constants';
@@ -26,9 +27,9 @@ describe('BondCardComponent', () => {
       providers: [
         BondCalculatorService,
         ChartConfigService,
+        { provide: PLATFORM_ID, useValue: 'server' },
       ]
     })
-      .overrideTemplate(BondCardComponent, '')
       .compileComponents();
 
     fixture = TestBed.createComponent(BondCardComponent);
@@ -66,7 +67,22 @@ describe('BondCardComponent', () => {
   });
 
   it('should return correct profit color', () => {
-    expect(component.profitColor).toBe('#2e7d32');
+    expect(component.resultSummary().profitColor).toBe('#2e7d32');
+  });
+
+  it('should return negative color when net profit is non-positive', () => {
+    fixture.componentRef.setInput('investmentAmount', 0);
+    fixture.detectChanges();
+
+    expect(component.resultSummary().profitColor).toBe('#d32f2f');
+  });
+
+  it('should render summary labels in template', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    expect(compiled.textContent).toContain('Zysk Brutto:');
+    expect(compiled.textContent).toContain('Podatek Belki:');
+    expect(compiled.textContent).toContain('Zysk Netto:');
   });
 
 });

@@ -1,5 +1,4 @@
-import { Component, inject, OnInit, DestroyRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { TopMenuComponent } from './components/top-menu/top-menu';
 import { SeoService } from './services/seo.service';
@@ -9,18 +8,18 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, TopMenuComponent],
+  imports: [RouterOutlet, TopMenuComponent],
   templateUrl: './app.html',
   styleUrl: './app.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
-  private router = inject(Router);
-  private activatedRoute = inject(ActivatedRoute);
-  private seoService = inject(SeoService);
-  private destroyRef = inject(DestroyRef);
-  title = 'polish-treasury-bonds-analyser';
+  private readonly router = inject(Router);
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly seoService = inject(SeoService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd),

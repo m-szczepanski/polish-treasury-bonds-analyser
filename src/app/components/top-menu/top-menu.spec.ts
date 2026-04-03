@@ -6,6 +6,12 @@ describe('TopMenuComponent', () => {
     let component: TopMenuComponent;
     let fixture: ComponentFixture<TopMenuComponent>;
 
+    const getAnchorByText = (text: string): HTMLAnchorElement | undefined => {
+        const compiled = fixture.nativeElement as HTMLElement;
+        const links = Array.from(compiled.querySelectorAll('a')) as HTMLAnchorElement[];
+        return links.find(link => link.textContent?.includes(text));
+    };
+
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [TopMenuComponent],
@@ -22,22 +28,19 @@ describe('TopMenuComponent', () => {
     });
 
     it('should have menu item for Kalkulator (home)', () => {
-        const compiled = fixture.nativeElement as HTMLElement;
-        const link = compiled.querySelector('a[routerLink="/"]');
+        const link = getAnchorByText('Kalkulator');
         expect(link).toBeTruthy();
         expect(link?.textContent).toContain('Kalkulator');
     });
 
     it('should have menu item for Strategy', () => {
-        const compiled = fixture.nativeElement as HTMLElement;
-        const link = compiled.querySelector('a[routerLink="/strategy"]');
+        const link = getAnchorByText('Strategia Inwestycyjna');
         expect(link).toBeTruthy();
         expect(link?.textContent).toContain('Strategia Inwestycyjna');
     });
 
     it('should have menu item for Portfolio Analysis', () => {
-        const compiled = fixture.nativeElement as HTMLElement;
-        const link = compiled.querySelector('a[routerLink="/analysis"]');
+        const link = getAnchorByText('Analiza portfela');
         expect(link).toBeTruthy();
         expect(link?.textContent).toContain('Analiza portfela');
     });
